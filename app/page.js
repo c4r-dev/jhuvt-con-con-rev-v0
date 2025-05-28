@@ -1,95 +1,175 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Button,
+  Container,
+  CircularProgress
+} from '@mui/material';
+import SessionConfigPopup from './components/SessionPopup/SessionConfigPopup'
+
+
+// Loading component for suspense
+function LoadingContent() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '50vh',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  )
+}
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+function AddressControlConstraint() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // State for session and student IDs
+  const [sessionId, setSessionId] = useState(null);
+  const [showConfigPopup, setShowConfigPopup] = useState(true)
+  const [studentId, setStudentId] = useState(null);
+
+  // Extract sessionId from URL on component mount
+  useEffect(() => {
+    const sessionIdFromUrl = searchParams.get('sessionID');
+    const studentIdFromUrl = searchParams.get('studentId');
+    
+    if (sessionIdFromUrl) {
+      setSessionId(sessionIdFromUrl);
+    }
+    
+    if (studentIdFromUrl) {
+      setStudentId(studentIdFromUrl);
+    }
+    
+    console.log('Session ID from URL:', sessionIdFromUrl);
+    console.log('Student ID from URL:', studentIdFromUrl);
+  }, [searchParams]);
+
+  const handleConfigClose = () => {
+    // Only allow closing if a sessionID exists
+    if (sessionId) {
+      setShowConfigPopup(false)
+    }
+  }
+
+  const handleSeeControlsClick = () => {
+    // Navigate to review controls with the session and student IDs
+    const queryParams = new URLSearchParams();
+    if (sessionId) queryParams.append('sessionID', sessionId);
+    if (studentId) queryParams.append('studentId', studentId);
+    
+    router.push(`/review-controls?${queryParams.toString()}`);
+  };
+
+  return (
+    <Box sx={{ flexGrow: 1, mt: 2 }}>
+      {/* Research Question Box */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          backgroundColor: '#e0e0e0',
+          mb: 2,
+          borderRadius: 1,
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="h3"
+          sx={{
+            fontWeight: 'bold',
+            fontSize: '1.3rem',
+            marginBottom: '10px',
+            color: '#000000',
+          }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Research question: Does Neuroserpin induce axonal elongation?
+        </Typography>
+      </Paper>
+
+      {/* Experiment Box */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          backgroundColor: '#e0e0e0',
+          mb: 3,
+          borderRadius: 1,
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="h4"
+          sx={{
+            fontWeight: 'bold',
+            fontSize: '1.3rem',
+            marginBottom: '15px',
+            color: '#000000',
+          }}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Experiment
+        </Typography>
+        <Typography 
+          variant="body1"
+          sx={{
+            fontSize: '1rem',
+            lineHeight: 1.6,
+            color: '#000000',
+          }}
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          PIn order to study the neural dynamics of perceptual integration, subjects listen to a sequence of tones experienced either as a single audio stream or as two parallel audio streams. Neurophysiological indices of information integration are calculated from scalp EEG recordings, identifying a functional network spanning two brain regions which is claimed to be responsible for perceptual integration and differentiation.
+        </Typography>
+      </Paper>
+
+      {/* See Controls Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Button
+          variant="contained"
+          onClick={handleSeeControlsClick}
+          sx={{
+            bgcolor: '#000000',
+            color: 'white',
+            px: 3,
+            py: 1.5,
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            '&:hover': {
+              bgcolor: '#333333',
+            },
+            borderRadius: 1,
+            textTransform: 'uppercase',
+          }}
+        >
+          SEE CONTROLS
+        </Button>
+        {showConfigPopup && (
+        <SessionConfigPopup
+          open={showConfigPopup}
+          onClose={handleConfigClose}
+          setSessionID={setSessionId}
+        />
+      )}
+      </Box>
+    </Box>
   );
+}
+
+export default function AddressControlConstraintScreen() {
+  return (
+    <Suspense fallback={<LoadingContent />}>
+      <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+        <AddressControlConstraint />
+      </Container>
+    </Suspense>
+  )
 }
