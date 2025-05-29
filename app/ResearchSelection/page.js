@@ -46,27 +46,45 @@ function AddressControlConstraint() {
   const [showControls, setShowControls] = useState(false)
   const [showLimitation, setShowLimitation] = useState(false)
   const [showMultipleChoice, setShowMultipleChoice] = useState(false)
+  const [showExplanationInput, setShowExplanationInput] = useState(false)
 
   // State for multiple choice selection and other option dialog
   const [selectedOption, setSelectedOption] = useState('')
   const [showOtherDialog, setShowOtherDialog] = useState(false)
   const [otherOptionText, setOtherOptionText] = useState('')
+  const [explanationText, setExplanationText] = useState('')
 
   // Extract sessionId from URL on component mount
-  useEffect(() => {
+ // Extract sessionId from URL on component mount
+useEffect(() => {
     const sessionIdFromUrl = searchParams.get('sessionID')
     const studentIdFromUrl = searchParams.get('studentId')
-
+    const customOptionFromUrl = searchParams.get('otherOptionText')
+    const explanationFromUrl = searchParams.get('explanation')
+  
     if (sessionIdFromUrl) {
       setSessionId(sessionIdFromUrl)
     }
-
+  
     if (studentIdFromUrl) {
       setStudentId(studentIdFromUrl)
     }
-
+  
+    // Initialize customOption from URL if present
+    if (customOptionFromUrl) {
+      setOtherOptionText(customOptionFromUrl)
+      setSelectedOption('Other.') // Auto-select "Other" option if customOption exists
+    }
+  
+    // Initialize explanation from URL if present
+    if (explanationFromUrl) {
+      setExplanationText(explanationFromUrl)
+    }
+  
     console.log('Session ID from URL:', sessionIdFromUrl)
     console.log('Student ID from URL:', studentIdFromUrl)
+    console.log('Custom Option from URL:', customOptionFromUrl)
+    console.log('Explanation from URL:', explanationFromUrl)
   }, [searchParams])
 
   const handleSeeControlsClick = () => {
@@ -111,10 +129,33 @@ function AddressControlConstraint() {
     // The checkbox will remain checked
   }
 
-  const handleOtherDialogSave = () => {
+//   const handleOtherDialogSave = () => {
+//     if (otherOptionText.trim()) {
+//       setSelectedOption('Other.')
+//       setShowOtherDialog(false)
+//     }
+//   }
+
+const handleOtherDialogSave = () => {
     if (otherOptionText.trim()) {
       setSelectedOption('Other.')
       setShowOtherDialog(false)
+      
+      // Add customOption and explanation to URL params immediately when saved
+      const queryParams = new URLSearchParams(window.location.search)
+      queryParams.set('otherOptionText', otherOptionText.trim())
+      
+      // Also add explanation if it exists
+      if (explanationText.trim()) {
+        queryParams.set('explanation', explanationText.trim())
+      }
+      
+      // Update the URL without navigating
+      const newUrl = `${window.location.pathname}?${queryParams.toString()}`
+      window.history.replaceState({}, '', newUrl)
+      
+      console.log('Custom option added to URL:', otherOptionText.trim())
+      console.log('Current explanation in URL:', explanationText.trim())
     }
   }
 
@@ -122,21 +163,226 @@ function AddressControlConstraint() {
     setOtherOptionText(event.target.value)
   }
 
-  const handleSubmit = () => {
-    // Navigate to review controls with the session and student IDs and selected option
-    const queryParams = new URLSearchParams()
-    if (sessionId) queryParams.append('sessionID', sessionId)
-    if (studentId) queryParams.append('studentId', studentId)
-    if (selectedOption) {
-      queryParams.append('selectedOption', selectedOption)
-      // If "Other" was selected, also include the custom text
-      if (selectedOption === 'Other.' && otherOptionText.trim()) {
-        queryParams.append('otherOptionText', otherOptionText.trim())
-      }
-    }
+  const handleExplanationTextChange = (event) => {
+    setExplanationText(event.target.value)
+  }
 
-    console.log('Navigating with URL params:', queryParams.toString())
-    router.push(`/ResearchSelection?${queryParams.toString()}`)
+  const handleSubmit = () => {
+    // Show the explanation input box
+    setShowExplanationInput(true)
+  }
+
+//   const saveUrlDataToAPI = async () => {
+//     try {
+//       // Extract all the data from URL and component state
+//       const urlParams = new URLSearchParams(window.location.search)
+      
+//       // Helper function to clean URL parameter values
+//       const cleanUrlParam = (value) => {
+//         if (!value) return value
+//         return value.replace(/%/g, '')
+//       }
+  
+//       // Prepare the data payload
+//       const payload = {
+//         sessionId: sessionId || urlParams.get('sessionID'),
+//         studentId: studentId || urlParams.get('studentId'),
+//         option: selectedOption || cleanUrlParam(urlParams.get('selectedOption')),
+//         customOption: otherOptionText || cleanUrlParam(urlParams.get('otherOptionText')),
+//         response: explanationText || cleanUrlParam(urlParams.get('explanation')),
+//         withinTimer: true // You can modify this based on your timer logic
+//       }
+  
+//       // Make the POST request to your API
+//       const response = await fetch('/api/controls', { // Replace with your actual API endpoint
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(payload)
+//       })
+  
+//       if (!response.ok) {
+//         const errorData = await response.json()
+//         throw new Error(errorData.message || 'Failed to save data')
+//       }
+  
+//       const result = await response.json()
+//       console.log('Data saved successfully:', result)
+//       return result
+  
+//     } catch (error) {
+//       console.error('Error saving data:', error)
+//       // You might want to show an error message to the user
+//       alert('Failed to save data. Please try again.')
+//       throw error
+//     }
+//   }
+
+// Updated saveUrlDataToAPI to accept a studentId parameter
+const saveUrlDataToAPI = async (overrideStudentId = null) => {
+    try {
+      // Extract all the data from URL and component state
+      const urlParams = new URLSearchParams(window.location.search)
+      
+      // Helper function to clean URL parameter values
+      const cleanUrlParam = (value) => {
+        if (!value) return value
+        return value.replace(/%/g, '')
+      }
+  
+      // Debug: Log what we're getting from URL and state
+      console.log('Current URL:', window.location.href)
+      console.log('URL Params:', Object.fromEntries(urlParams.entries()))
+      console.log('State values:', {
+        sessionId,
+        studentId,
+        selectedOption,
+        otherOptionText,
+        explanationText
+      })
+  
+      // Use override studentId if provided, otherwise use the existing logic
+      const finalStudentId = overrideStudentId || 
+                            studentId || 
+                            cleanUrlParam(urlParams.get('studentId')) || 
+                            `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+      // Prepare the data payload
+      const payload = {
+        sessionId: sessionId || cleanUrlParam(urlParams.get('sessionID')),
+        studentId: finalStudentId,
+        option: selectedOption || cleanUrlParam(urlParams.get('selectedOption')),
+        customOption: otherOptionText || cleanUrlParam(urlParams.get('otherOptionText')),
+        response: explanationText || cleanUrlParam(urlParams.get('explanation')),
+        withinTimer: true // You can modify this based on your timer logic
+      }
+  
+      console.log('Payload being sent:', payload)
+  
+      // Validate that we have required fields
+      if (!payload.sessionId || !payload.studentId) {
+        throw new Error(`Missing required fields: sessionId=${payload.sessionId}, studentId=${payload.studentId}`)
+      }
+  
+      // Make the POST request to your API
+      const response = await fetch('/api/controls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+  
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to save data')
+      }
+  
+      const result = await response.json()
+      console.log('Data saved successfully:', result)
+    //   if (result.timerStarted) {
+    //     setIsTimerConfirmedStarted(true);
+    //     fetchTimerStatus();
+    // }
+      return result
+  
+    } catch (error) {
+      console.error('Error saving data:', error)
+      // You might want to show an error message to the user
+      alert('Failed to save data. Please try again.')
+      throw error
+    }
+  }
+  
+  
+
+//   const handleFinalSubmit = async () => {
+//     // Navigate to review controls with the session and student IDs and selected option
+//     const queryParams = new URLSearchParams()
+//     if (sessionId) queryParams.append('sessionID', sessionId)
+    
+//     // Generate a unique student ID if one doesn't exist, otherwise use existing one
+//     const finalStudentId = studentId || `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+//     queryParams.append('studentId', finalStudentId)
+//     if (selectedOption) {
+//       queryParams.append('selectedOption', selectedOption)
+//       // If "Other" was selected, also include the custom text
+//       if (selectedOption === 'Other.' && otherOptionText.trim()) {
+//         queryParams.append('otherOptionText', otherOptionText.trim())
+//       }
+//     }
+//     if (explanationText.trim()) {
+//       queryParams.append('explanation', explanationText.trim())
+//     }
+  
+//     console.log('Navigating with URL params:', queryParams.toString())
+//     router.push(`/ResearchSelection?${queryParams.toString()}`)
+
+//     try {
+//         // Save the current state to the database
+//         await saveUrlDataToAPI()
+        
+//         // Start your timer logic here
+//         console.log('Timer started and data saved!')
+        
+//         // You might want to navigate or update UI after successful save
+//         // router.push('/next-page')
+        
+//       } catch (error) {
+//         // Handle error - maybe don't start timer if save failed
+//         console.error('Failed to save data before starting timer')
+//       }
+    
+//   }
+
+// Updated handleFinalSubmit
+const handleFinalSubmit = async () => {
+    try {
+      // Get the current URL params to extract studentId if it exists
+      const urlParams = new URLSearchParams(window.location.search)
+      const cleanUrlParam = (value) => {
+        if (!value) return value
+        return value.replace(/%/g, '')
+      }
+  
+      // Determine the final studentId ONCE
+      const finalStudentId = studentId || 
+                            cleanUrlParam(urlParams.get('studentId')) || 
+                            `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      
+      console.log('Using studentId for both API and navigation:', finalStudentId)
+  
+      // FIRST: Save the current state to the database BEFORE navigation
+      // Pass the finalStudentId to ensure consistency
+      await saveUrlDataToAPI(finalStudentId)
+      console.log('Data saved successfully!')
+      
+      // THEN: Navigate to the next page using the SAME studentId
+      const queryParams = new URLSearchParams()
+      if (sessionId) queryParams.append('sessionID', sessionId)
+      
+      queryParams.append('studentId', finalStudentId)
+      if (selectedOption) {
+        queryParams.append('selectedOption', selectedOption)
+        // If "Other" was selected, also include the custom text
+        if (selectedOption === 'Other.' && otherOptionText.trim()) {
+          queryParams.append('otherOptionText', otherOptionText.trim())
+        }
+      }
+      if (explanationText.trim()) {
+        queryParams.append('explanation', explanationText.trim())
+      }
+    
+      console.log('Navigating with URL params:', queryParams.toString())
+      router.push(`/ResearchSelection?${queryParams.toString()}`)
+      
+    } catch (error) {
+      // Handle error - don't navigate if save failed
+      console.error('Failed to save data before navigation:', error)
+      // Optionally show user feedback
+      alert('Failed to save data. Please try again.')
+    }
   }
 
   return (
@@ -344,10 +590,54 @@ function AddressControlConstraint() {
               </Paper>
             ))}
           </Box>
-
-          {/* Bottom Z Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}></Box>
         </Box>
+      )}
+
+      {/* Explanation Input Box - Only visible when showExplanationInput is true */}
+      {showExplanationInput && (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#e0e0e0',
+            mb: 3,
+            borderRadius: 1,
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: '1rem',
+              color: '#999999',
+              marginBottom: '15px',
+            }}
+          >
+            Explain why you picked this option...
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
+            variant="outlined"
+            value={explanationText}
+            onChange={handleExplanationTextChange}
+            placeholder=""
+            sx={{
+              backgroundColor: 'white',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#e0e0e0',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#bdbdbd',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#2196f3',
+                },
+              },
+            }}
+          />
+        </Paper>
       )}
 
       {/* Other Option Dialog */}
@@ -495,8 +785,8 @@ function AddressControlConstraint() {
         </Box>
       )}
 
-      {/* Submit Button - Show when multiple choice is visible, enabled only when option is selected */}
-      {showMultipleChoice && (
+      {/* Submit Button - Show when multiple choice is visible and explanation input is not shown */}
+      {showMultipleChoice && !showExplanationInput && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
             variant="contained"
@@ -522,6 +812,31 @@ function AddressControlConstraint() {
             }}
           >
             SUBMIT
+          </Button>
+        </Box>
+      )}
+
+      {/* Final Submit Button - Show when explanation input is visible */}
+      {showExplanationInput && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleFinalSubmit}
+            sx={{
+              bgcolor: '#000000',
+              color: 'white',
+              px: 4,
+              py: 1.5,
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              '&:hover': {
+                bgcolor: '#333333',
+              },
+              borderRadius: 1,
+              textTransform: 'uppercase',
+            }}
+          >
+            SUBMIT AND START GROUP COUNTDOWN
           </Button>
         </Box>
       )}
