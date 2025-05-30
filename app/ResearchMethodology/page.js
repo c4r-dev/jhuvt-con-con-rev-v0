@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -13,7 +13,8 @@ import {
   Container,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  CircularProgress
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
@@ -68,7 +69,23 @@ const AnswerFieldPaper = styled(Paper)(({ theme }) => ({
   minHeight: '120px',
 }));
 
-export default function ResearchMethodologyScreen() {
+// Loading component for suspense
+function LoadingContent() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '50vh',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  )
+}
+
+function ResearchMethodologyScreen() {
   const searchParams = useSearchParams();
   const [compromiseChecked, setCompromiseChecked] = useState(true);
   const [limitExplanation, setLimitExplanation] = useState('');
@@ -435,4 +452,12 @@ export default function ResearchMethodologyScreen() {
       </Box>
     </Container>
   );
+}
+
+export default function ResearchMethodologyPage() {
+  return (
+    <Suspense fallback={<LoadingContent />}>
+      <ResearchMethodologyScreen />
+    </Suspense>
+  )
 }
