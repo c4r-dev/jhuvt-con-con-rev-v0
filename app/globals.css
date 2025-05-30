@@ -40,3 +40,360 @@ a {
     color-scheme: dark;
   }
 }
+
+
+/* //css for timer logic */
+
+body {
+  font-family: sans-serif;
+  background-color: #f4f7f6; /* Light background for the page */ 
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.flowchart-container {
+  background-color: #ffffff; /* White background for the main content */
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 900px; /* Limit overall width */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flowchart-image-container {
+  margin-bottom: 30px; /* Space below the image */
+  width: 100%; /* Ensure container takes width */
+  display: flex;
+  justify-content: center;
+}
+
+/* Ensure regular img tag respects container */
+.flowchart-image {
+  max-width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 4px;
+  display: block; /* Remove any inline spacing */
+}
+
+/* Ensure Image component respects container */
+.flowchart-image-container img {
+  max-width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 4px;
+}
+
+.randomization-section {
+  background-color: #f0f0f0; /* Light grey background for this section */
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 700px; /* Control width of the ideas section */
+  box-sizing: border-box; /* Include padding in width */
+  margin-bottom: 30px; /* Space before action buttons */
+}
+
+/* Container for Title and Timer */
+.header-container {
+  display: flex;
+  justify-content: space-between; /* Puts title left, timer right */
+  align-items: center; /* Vertically aligns title and timer */
+  margin-bottom: 15px; /* Keep space below header block */
+  min-height: 2em; /* Ensure space even if timer isn't shown yet */
+}
+
+/* Timer Display Styles */
+.timer-display {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.timer-display.expired {
+  color: #d32f2f; /* Red when expired */
+  background-color: #ffebee;
+}
+
+.randomization-section h2 {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: left;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+}
+
+.input-container {
+  display: flex; /* Align input and potential button */
+  margin-bottom: 15px;
+  gap: 10px; /* Add space between input and button */
+}
+
+.input-container input[type="text"] {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.input-container input[type="text"]:focus {
+  border-color: #888;
+}
+
+.input-container input[type="text"]:disabled {
+  background-color: #eee; /* Grey out when disabled */
+  cursor: not-allowed;
+}
+
+.ideas-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ideas-list li {
+  background-color: #e9e9e9; /* Slightly darker background for items */
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.ideas-list li.system-added {
+  background-color: #c5aaf1; /* Purple background for system added */
+  color: #333;
+}
+
+.ideas-list li.inspiration-idea {
+  background-color: #e0e7ff; /* Light blue for inspiration */
+  color: #333;
+  font-style: italic;
+  opacity: 0.85;
+  cursor: default;
+}
+
+.ideas-list li span {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1.4rem; /* Make 'X' bigger */
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.remove-button:hover {
+  color: #000;
+}
+
+/* Renamed container class */
+.action-buttons-container {
+  width: 100%;
+  max-width: 700px; /* Match width of randomization section */
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 15px; /* Add space between buttons */
+}
+
+/* Style for the new Save Ideas button */
+.save-ideas-button {
+  background-color: #4CAF50; /* Green background */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out;
+  max-width: 260px;
+  width: 100%;
+}
+
+.save-ideas-button:hover {
+  background-color: #45a049;
+}
+
+.save-ideas-button:disabled {
+  background-color: #aaa; /* More distinct disabled color */
+  color: #eee;
+  cursor: not-allowed;
+}
+
+.continue-button {
+  background-color: #333; /* Dark background */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.continue-button:hover {
+  background-color: #888;
+}
+
+.continue-button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+  padding: 5px 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border-left: 3px solid #d32f2f;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.add-idea-button {
+  background-color: #666;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.add-idea-button:hover {
+  background-color: #888;
+}
+
+/* Ensure Add Idea button also gets disabled styling */
+.add-idea-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Programmatic Flowchart Styles */
+.programmatic-flowchart {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Takes width of its parent, flowchart-container */
+  gap: 5px; /* Reduced space between rows */
+  margin-bottom: 30px; /* Space below the flowchart */
+}
+
+.flowchart-row-header,
+.flowchart-row {
+  display: flex;
+  gap: 5px; /* Reduced space between steps in a row */
+  align-items: stretch; /* Make items in a row take same height */
+}
+
+.flowchart-step {
+  padding: 10px 12px; /* Reduced padding */
+  border-radius: 5px; /* Slightly adjusted border radius */
+  color: white;
+  font-size: 0.85rem; /* Reduced font size */
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1; /* Allow steps to grow and fill space */
+  flex-basis: 0; /* Important for equal distribution with flex-grow */
+  box-sizing: border-box;
+  line-height: 1.3;
+  min-height: 44px; /* Adjusted min-height */
+}
+
+/* Team Headers */
+.team-a-header {
+  background-color: #3cb878; /* Team A Green */
+}
+
+.team-b-header {
+  background-color: #4a86e8; /* Team B Blue */
+}
+
+/* Shared Steps */
+.shared-step.prepare-step {
+  background-color: #3cb878; /* Team A Green */
+  /* flex-basis is already 0 and grow is 1, so it will take full width if it's the only child */
+}
+
+.shared-step.manuscript-step {
+  background-color: #2a8f5d; /* Darker Green for manuscript step */
+   /* flex-basis is already 0 and grow is 1 */
+}
+
+/* Team-Specific Steps */
+.team-a-step {
+  background-color: #3cb878; /* Team A Green */
+}
+
+.team-b-step {
+  background-color: #4a86e8; /* Team B Blue */
+}
+
+/* Empty step for layout */
+.empty-step {
+  background-color: transparent;
+  border: 1px solid transparent; /* Maintain space like other boxes if needed for alignment */
+  /* min-height and padding are inherited from .flowchart-step, which is good */
+  /* Ensure it does not appear as a colored box */
+  color: transparent; /* Hide any accidental text/whitespace */
+}
+
+.flowchart-instruction {
+  text-align: center;
+  padding-bottom: 18px;
+  font-size: 1.08rem;
+  color: #222;
+}
