@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Box,
   Typography,
@@ -12,9 +13,14 @@ import {
   Tabs,
   TextField,
   Container,
-  Paper
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
-// No chart library imports needed
 
 const chartData = [
   { name: 'Set aside', value: 6 },
@@ -24,7 +30,17 @@ const chartData = [
 ];
 
 export default function StrategyScreen() {
+  const searchParams = useSearchParams();
   const [selectedTab, setSelectedTab] = useState(0);
+  const [sessionData, setSessionData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState([
+    { name: 'Set aside', value: 0 },
+    { name: 'Pilot study', value: 0 },
+    { name: 'Estimate\nRegions', value: 0 },
+    { name: 'Other', value: 0 }
+  ]);
   const [explanations, setExplanations] = useState({
     explanation1: '',
     explanation2: '',
@@ -36,30 +52,185 @@ export default function StrategyScreen() {
     limit3: ''
   });
 
+  // Tab options mapping - maps tab index to actual option values in the data
+  const tabOptions = [
+    'Set this experiment aside.',
+    'Compromise option 1.', // PILOT STUDY tab
+    'Compromise option 2.', // COMPUTATIONAL ESTIMATE tab
+    'Other.'
+  ];
+
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
   };
 
-  const handleExplanationChange = (field, value) => {
-    setExplanations(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // Fetch session data on component mount
+  useEffect(() => {
+    const sessionId = searchParams.get('sessionID');
+    console.log('Session ID from URL:', sessionId);
+    if (sessionId) {
+      fetchSessionData(sessionId);
+    } else {
+      console.error('No sessionID found in URL parameters');
+      setLoading(false);
+    }
+  }, [searchParams]);
+
+  // Update chart data when session data changes
+  useEffect(() => {
+    updateChartData();
+  }, [sessionData]);
+
+  // Filter data when selectedTab changes
+  useEffect(() => {
+    filterDataByTab();
+  }, [selectedTab, sessionData]);
+
+  const fetchSessionData = async (sessionId) => {
+    try {
+      setLoading(true);
+      console.log('Fetching data for session:', sessionId);
+      
+      const response = await fetch(`/api/controls?sessionId=${sessionId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch session data: ${response.status}`);
+      }
+      
+      const apiResponse = await response.json();
+      console.log('Raw API Response:', apiResponse);
+      
+      // Extract students array from the nested response structure
+      let studentsArray = [];
+      if (apiResponse.data && apiResponse.data.students && Array.isArray(apiResponse.data.students)) {
+        studentsArray = apiResponse.data.students;
+      } else if (Array.isArray(apiResponse.students)) {
+        studentsArray = apiResponse.students;
+      } else if (Array.isArray(apiResponse)) {
+        studentsArray = apiResponse;
+      } else if (apiResponse.data && Array.isArray(apiResponse.data)) {
+        studentsArray = apiResponse.data;
+      }
+      
+      console.log('Extracted students array:', studentsArray);
+      setSessionData(studentsArray);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching session data:', error);
+      setLoading(false);
+    }
   };
 
-  const handleLimitChange = (field, value) => {
-    setLimits(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const updateChartData = () => {
+    if (!sessionData.length) {
+      setChartData([
+        { name: 'Set aside', value: 0 },
+        { name: 'Pilot study', value: 0 },
+        { name: 'Estimate\nRegions', value: 0 },
+        { name: 'Other', value: 0 }
+      ]);
+      return;
+    }
+
+    // Count occurrences of each option
+    const counts = {
+      'Set this experiment aside.': 0,
+      'Compromise option 1.': 0,
+      'Compromise option 2.': 0,
+      'Other.': 0
+    };
+
+    sessionData.forEach(student => {
+      if (counts.hasOwnProperty(student.option)) {
+        counts[student.option]++;
+      }
+    });
+
+    console.log('Option counts:', counts);
+
+    // Update chart data with actual counts
+    setChartData([
+      { name: 'Set aside', value: counts['Set this experiment aside.'] },
+      { name: 'Pilot study', value: counts['Compromise option 1.'] },
+      { name: 'Estimate\nRegions', value: counts['Compromise option 2.'] },
+      { name: 'Other', value: counts['Other.'] }
+    ]);
   };
+
+  const filterDataByTab = () => {
+    if (!sessionData.length) {
+      console.log('No session data available for filtering');
+      return;
+    }
+
+    const selectedOption = tabOptions[selectedTab];
+    console.log('Filtering by option:', selectedOption);
+    console.log('Available data:', sessionData);
+    
+    // Filter data based on selected tab option
+    const filtered = sessionData.filter(student => {
+      console.log('Student option:', student.option, 'Match:', student.option === selectedOption);
+      return student.option === selectedOption;
+    });
+    
+    console.log('Filtered data:', filtered);
+    setFilteredData(filtered);
+    
+    // Update explanations and limits based on filtered data
+    const newExplanations = {};
+    const newLimits = {};
+    
+    // Reset all fields first
+    for (let i = 1; i <= 3; i++) {
+      newExplanations[`explanation${i}`] = '';
+      newLimits[`limit${i}`] = '';
+    }
+    
+    // Populate with filtered data - using response field for explanations
+    filtered.forEach((student, index) => {
+      if (index < 3) { // Only show first 3 entries
+        newExplanations[`explanation${index + 1}`] = student.response || ''; // This is the response field from API
+        newLimits[`limit${index + 1}`] = student.limitExplanation || ''; // This is the limitExplanation field from API
+        
+        console.log(`Entry ${index + 1}:`, {
+          studentId: student.studentId,
+          option: student.option,
+          response: student.response, // This should show in explanations
+          limitExplanation: student.limitExplanation // This should show in limits
+        });
+      }
+    });
+    
+    setExplanations(newExplanations);
+    setLimits(newLimits);
+    
+    console.log('Updated explanations:', newExplanations);
+    console.log('Updated limits:', newLimits);
+  };
+
+  // Debug: Show current state
+  console.log('Current state:', {
+    selectedTab,
+    sessionDataLength: sessionData.length,
+    filteredDataLength: filteredData.length,
+    explanations,
+    limits
+  });
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      {/* Header */}
-      <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
-        Screen 3
-      </Typography>
+      {/* Loading indicator */}
+      {loading && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Loading session data...
+        </Alert>
+      )}
+
+      {/* Error message if no data */}
+      {!loading && sessionData.length === 0 && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          No data found for this session. Please check the sessionID in the URL.
+        </Alert>
+      )}
 
       {/* Constraint Alert */}
       <Alert 
@@ -74,25 +245,12 @@ export default function StrategyScreen() {
         }}
       >
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          constraint
+          Limitation
         </Typography>
         <Typography variant="body2">
           Oh no! There is a constraint they need to address that complicates the controls they want to use.
         </Typography>
       </Alert>
-
-      {/* Activity Highlights Section */}
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          mb: 2, 
-          color: '#999',
-          textTransform: 'lowercase',
-          fontSize: '1.1rem'
-        }}
-      >
-        activity-highlights
-      </Typography>
 
       {/* Chart Section */}
       <Paper elevation={1} sx={{ p: 3, mb: 3, backgroundColor: '#f5f5f5' }}>
@@ -115,10 +273,11 @@ export default function StrategyScreen() {
               pt: 1
             }}
           >
-            <span>20</span>
-            <span>15</span>
             <span>10</span>
-            <span>5</span>
+            <span>8</span>
+            <span>6</span>
+            <span>4</span>
+            <span>2</span>
             <span>0</span>
           </Box>
           
@@ -153,22 +312,26 @@ export default function StrategyScreen() {
               background: `
                 linear-gradient(to top, 
                   transparent 0%, 
-                  transparent calc(20% - 1px), 
-                  #ddd calc(20% - 1px), 
-                  #ddd calc(20% + 1px), 
-                  transparent calc(20% + 1px),
-                  transparent calc(40% - 1px), 
-                  #ddd calc(40% - 1px), 
-                  #ddd calc(40% + 1px), 
-                  transparent calc(40% + 1px),
-                  transparent calc(60% - 1px), 
-                  #ddd calc(60% - 1px), 
-                  #ddd calc(60% + 1px), 
-                  transparent calc(60% + 1px),
-                  transparent calc(80% - 1px), 
-                  #ddd calc(80% - 1px), 
-                  #ddd calc(80% + 1px), 
-                  transparent calc(80% + 1px)
+                  transparent calc(16.67% - 1px), 
+                  #ddd calc(16.67% - 1px), 
+                  #ddd calc(16.67% + 1px), 
+                  transparent calc(16.67% + 1px),
+                  transparent calc(33.33% - 1px), 
+                  #ddd calc(33.33% - 1px), 
+                  #ddd calc(33.33% + 1px), 
+                  transparent calc(33.33% + 1px),
+                  transparent calc(50% - 1px), 
+                  #ddd calc(50% - 1px), 
+                  #ddd calc(50% + 1px), 
+                  transparent calc(50% + 1px),
+                  transparent calc(66.67% - 1px), 
+                  #ddd calc(66.67% - 1px), 
+                  #ddd calc(66.67% + 1px), 
+                  transparent calc(66.67% + 1px),
+                  transparent calc(83.33% - 1px), 
+                  #ddd calc(83.33% - 1px), 
+                  #ddd calc(83.33% + 1px), 
+                  transparent calc(83.33% + 1px)
                 )
               `
             }}
@@ -199,7 +362,7 @@ export default function StrategyScreen() {
                   <Box
                     sx={{
                       width: '40px',
-                      height: `${(item.value / 20) * 100}%`,
+                      height: `${(item.value / 10) * 100}%`,
                       backgroundColor: '#4CAF50',
                       borderRadius: '4px 4px 0 0'
                     }}
@@ -261,10 +424,11 @@ export default function StrategyScreen() {
         <Tabs 
           value={selectedTab} 
           onChange={handleTabChange}
+          centered
           sx={{
             '& .MuiTab-root': {
-              backgroundColor: selectedTab === 0 ? '#333' : '#ccc',
-              color: selectedTab === 0 ? 'white' : '#666',
+              backgroundColor: '#ccc',
+              color: '#666',
               textTransform: 'uppercase',
               fontWeight: 'bold',
               minHeight: 48,
@@ -285,135 +449,87 @@ export default function StrategyScreen() {
         </Tabs>
       </Paper>
 
-      {/* Form Section */}
+      {/* Debug Info */}
+      {!loading && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            <strong>Debug Info:</strong> Found {sessionData.length} total records, 
+            showing {filteredData.length} records for &quot;{tabOptions[selectedTab]}&quot;
+          </Typography>
+          {filteredData.length > 0 && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>Sample data:</strong> {JSON.stringify(filteredData[0], null, 2)}
+            </Typography>
+          )}
+        </Alert>
+      )}
+
+      {/* Table Section */}
       <Paper elevation={1} sx={{ p: 3, mb: 3, backgroundColor: '#e8e8e8' }}>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            mb: 3, 
-            color: '#666',
-            textTransform: 'uppercase',
-            fontSize: '0.75rem'
-          }}
-        >
-          THIS IS A TABLE PLACEHOLDER. ALL ENTRIES FOR THIS SESSION ARE DISPLAYED.
-        </Typography>
+      
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
-          {/* Left Column - Explanations */}
-          <Box>
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="EXPLANATION 1"
-              value={explanations.explanation1}
-              onChange={(e) => handleExplanationChange('explanation1', e.target.value)}
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="EXPLANATION 2"
-              value={explanations.explanation2}
-              onChange={(e) => handleExplanationChange('explanation2', e.target.value)}
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="EXPLANATION 3"
-              value={explanations.explanation3}
-              onChange={(e) => handleExplanationChange('explanation3', e.target.value)}
-              sx={{ 
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-          </Box>
-
-          {/* Right Column - Limits */}
-          <Box>
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="LIMIT 1"
-              value={limits.limit1}
-              onChange={(e) => handleLimitChange('limit1', e.target.value)}
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="LIMIT 2"
-              value={limits.limit2}
-              onChange={(e) => handleLimitChange('limit2', e.target.value)}
-              sx={{ 
-                mb: 2,
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="LIMIT 3"
-              value={limits.limit3}
-              onChange={(e) => handleLimitChange('limit3', e.target.value)}
-              sx={{ 
-                '& .MuiOutlinedInput-input': {
-                  backgroundColor: '#d0d0d0'
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#666',
-                  fontWeight: 'bold',
-                  fontSize: '0.875rem'
-                }
-              }}
-            />
-          </Box>
-        </Box>
+        <TableContainer component={Paper} sx={{ backgroundColor: '#f5f5f5' }}>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#d0d0d0' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#666', fontSize: '0.875rem' }}>
+                  EXPLANATION
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#666', fontSize: '0.875rem' }}>
+                  LIMIT
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData.length === 0 ? (
+                // Show "no information" when no data
+                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell 
+                    colSpan={2} 
+                    sx={{ 
+                      backgroundColor: '#f0f0f0', 
+                      padding: 2,
+                      textAlign: 'center',
+                      height: '100px'
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
+                      No information
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                // Show data when available
+                [1, 2, 3].map((num) => (
+                  <TableRow key={num} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell sx={{ 
+                      backgroundColor: '#f0f0f0', 
+                      padding: 2,
+                      verticalAlign: 'top',
+                      maxWidth: '300px',
+                      wordWrap: 'break-word'
+                    }}>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {explanations[`explanation${num}`] || ''}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ 
+                      backgroundColor: '#f0f0f0', 
+                      padding: 2,
+                      verticalAlign: 'top',
+                      maxWidth: '300px',
+                      wordWrap: 'break-word'
+                    }}>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {limits[`limit${num}`] || ''}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
 
       {/* Submit Button */}

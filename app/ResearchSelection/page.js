@@ -61,8 +61,9 @@ function AddressControlConstraint() {
   const [sessionId, setSessionId] = useState(null)
   const [studentId, setStudentId] = useState(null)
 
-  // State to control visibility of the Controls box, Limitation box, and Multiple Choice
+  // State to control visibility of the Controls box, Proposed Control box, Limitation box, and Multiple Choice
   const [showControls, setShowControls] = useState(false)
+  const [showProposedControl, setShowProposedControl] = useState(false)
   const [showLimitation, setShowLimitation] = useState(false)
   const [showMultipleChoice, setShowMultipleChoice] = useState(false)
   const [showExplanationInput, setShowExplanationInput] = useState(false)
@@ -276,13 +277,13 @@ function AddressControlConstraint() {
   }
 
   const handleTheresAProblemClick = () => {
-    // Show the limitation box instead of navigating immediately
-    setShowLimitation(true)
+    // Show the proposed control box instead of limitation box
+    setShowProposedControl(true)
   }
 
   const handleAddressTheConstraintClick = () => {
-    // Show the multiple choice options instead of navigating immediately
-    setShowMultipleChoice(true)
+    // Show the limitation box instead of navigating immediately
+    setShowLimitation(true)
   }
 
   const handleOptionSelect = (option) => {
@@ -439,6 +440,7 @@ function AddressControlConstraint() {
   //   }
 
   // Updated saveUrlDataToAPI to accept a studentId parameter
+ // Updated saveUrlDataToAPI to accept a studentId parameter and map options
   const saveUrlDataToAPI = async (overrideStudentId = null) => {
     try {
       // Extract all the data from URL and component state
@@ -448,6 +450,22 @@ function AddressControlConstraint() {
       const cleanUrlParam = (value) => {
         if (!value) return value
         return value.replace(/%/g, '')
+      }
+
+      // Function to map displayed option text to API option names
+      const mapOptionForAPI = (displayedOption) => {
+        switch (displayedOption) {
+          case 'Run a depth electrode pilot study in a single clinical participant.':
+            return 'Compromise option 1.'
+          case 'Use computational methods to estimate which cortical regions generated each scalp signal, then measure mutual information between those reconstructed regions.':
+            return 'Compromise option 2.'
+          case 'Set this experiment aside.':
+            return 'Set this experiment aside.'
+          case 'Other.':
+            return 'Other.'
+          default:
+            return displayedOption // Return as-is if no mapping found
+        }
       }
 
       // Debug: Log what we're getting from URL and state
@@ -468,12 +486,18 @@ function AddressControlConstraint() {
         cleanUrlParam(urlParams.get('studentId')) ||
         `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
+      // Get the current option and map it for the API
+      const currentOption = selectedOption || cleanUrlParam(urlParams.get('selectedOption'))
+      const mappedOption = mapOptionForAPI(currentOption)
+
+      console.log('Original option:', currentOption)
+      console.log('Mapped option for API:', mappedOption)
+
       // Prepare the data payload
       const payload = {
         sessionId: sessionId || cleanUrlParam(urlParams.get('sessionID')),
         studentId: finalStudentId,
-        option:
-          selectedOption || cleanUrlParam(urlParams.get('selectedOption')),
+        option: mappedOption, // Use mapped option instead of original
         customOption:
           otherOptionText || cleanUrlParam(urlParams.get('otherOptionText')),
         response:
@@ -506,10 +530,6 @@ function AddressControlConstraint() {
 
       const result = await response.json()
       console.log('Data saved successfully:', result)
-      //   if (result.timerStarted) {
-      //     setIsTimerConfirmedStarted(true);
-      //     fetchTimerStatus();
-      // }
 
       const response1 = await fetch('/api/saveRandomizationIdeas', {
         method: 'POST',
@@ -675,7 +695,7 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-          Research question: does neuroserpin induce axonal elongation?
+          Research question: Does Neuroserpin induce axonal elongation?
         </Typography>
       </Paper>
 
@@ -709,9 +729,7 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-          Placeholder text that will relate relevant details of the experiment.
-          Enough information is required for this to not feel like a total waste
-          of time!
+         In order to study the neural dynamics of perceptual integration, subjects listen to a sequence of tones experienced either as a single audio stream or as two parallel audio streams. Neurophysiological indices of information integration are calculated from scalp EEG recordings, identifying a functional network spanning two brain regions which is claimed to be responsible for perceptual integration and differentiation.
         </Typography>
       </Paper>
 
@@ -721,7 +739,7 @@ function AddressControlConstraint() {
           elevation={0}
           sx={{
             p: 2,
-            backgroundColor: '#e0e0e0',
+            backgroundColor: 'rgba(255, 90, 0, 0.2)',
             mb: 3,
             borderRadius: 1,
             border: '2px solid #2196f3',
@@ -737,7 +755,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Controls
+            Concern
           </Typography>
           <Typography
             variant="body1"
@@ -747,9 +765,44 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Placeholder text that will relate relevant details of the controls
-            used in the experiment. This includes both the controls used and the
-            rationale for those controls.
+           Unverified regional specificity: There is no confirmation that the observed information transfer is specific the monitored brain regions, so any claim describing neural dynamics would be predicated on the assumption that the findings aren't confounded by other regions or connections.
+          </Typography>
+        </Paper>
+      )}
+
+      {/* Proposed Control Box - Only visible when showProposedControl is true */}
+      {showProposedControl && (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            backgroundColor: '#d4f6d4',
+            mb: 3,
+            borderRadius: 1,
+            border: '1px solid #4caf50',
+          }}
+        >
+          <Typography
+            variant="h5"
+            component="h4"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '1.3rem',
+              marginBottom: '15px',
+              color: '#4caf50',
+            }}
+          >
+            Proposed control
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: '1rem',
+              lineHeight: 1.6,
+              color: '#000000',
+            }}
+          >
+            Use depth electrodes: Include readings from depth electrodes which provide high spatial resolution and signal fidelity, enabling measurement of potential effects in other major cortical hubs.
           </Typography>
         </Paper>
       )}
@@ -785,8 +838,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Oh no! There is a constraint they need to address that complicates
-            the controls they want to use.
+           Sample Size: Depth electrodes require a much more invasive procedure, which will limit your ability to recruit subjects for the experiment.
           </Typography>
         </Paper>
       )}
@@ -798,8 +850,8 @@ function AddressControlConstraint() {
           <Box sx={{ mb: 3 }}>
             {[
               'Set this experiment aside.',
-              'Compromise option 1.',
-              'Compromise option 2.',
+              'Run a depth electrode pilot study in a single clinical participant.',
+              'Use computational methods to estimate which cortical regions generated each scalp signal, then measure mutual information between those reconstructed regions.',
               'Other.',
             ].map((option, index) => (
               <Paper
@@ -1063,13 +1115,13 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-            SEE CONTROLS
+            THERE&apos;S A PROBLEM!
           </Button>
         </Box>
       )}
 
-      {/* There's a Problem Button - Only show when controls are visible but limitation is not */}
-      {showControls && !showLimitation && (
+      {/* Address the Concern Button - Only show when controls are visible but proposed control is not */}
+      {showControls && !showProposedControl && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
             variant="contained"
@@ -1088,13 +1140,13 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-            THERE&apos;S A PROBLEM!
+           ADDRESS THE CONCERN
           </Button>
         </Box>
       )}
 
-      {/* Address the Constraint Button - Only show when limitation is visible but multiple choice is not */}
-      {showLimitation && !showMultipleChoice && (
+      {/* There's a Problem Button - Only show when proposed control is visible but limitation is not */}
+      {showProposedControl && !showLimitation && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
             variant="contained"
@@ -1113,7 +1165,32 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-            ADDRESS THE CONSTRAINT
+           THERE&apos;S A PROBLEM!
+          </Button>
+        </Box>
+      )}
+
+      {/* Address the Constraint Button - Only show when limitation is visible but multiple choice is not */}
+      {showLimitation && !showMultipleChoice && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={() => setShowMultipleChoice(true)}
+            sx={{
+              bgcolor: '#000000',
+              color: 'white',
+              px: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              '&:hover': {
+                bgcolor: '#333333',
+              },
+              borderRadius: 1,
+              textTransform: 'uppercase',
+            }}
+          >
+           WHAT SHOULD BE DONE?
           </Button>
         </Box>
       )}

@@ -127,8 +127,7 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-          PIn order to study the neural dynamics of perceptual integration, subjects listen to a sequence of tones experienced either as a single audio stream or as two parallel audio streams. Neurophysiological indices of information integration are calculated from scalp EEG recordings, identifying a functional network spanning two brain regions which is claimed to be responsible for perceptual integration and differentiation.
-        </Typography>
+In order to study the neural dynamics of perceptual integration, subjects listen to a sequence of tones experienced either as a single audio stream or as two parallel audio streams. Neurophysiological indices of information integration are calculated from scalp EEG recordings, identifying a functional network spanning two brain regions which is claimed to be responsible for perceptual integration and differentiation.        </Typography>
       </Paper>
 
       {/* See Controls Button */}
