@@ -765,7 +765,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-           Unverified regional specificity: There is no confirmation that the observed information transfer is specific the monitored brain regions, so any claim describing neural dynamics would be predicated on the assumption that the findings aren't confounded by other regions or connections.
+           Unverified regional specificity: There is no confirmation that the observed information transfer is specific the monitored brain regions, so any claim describing neural dynamics would be predicated on the assumption that the findings aren&apos;t confounded by other regions or connections.
           </Typography>
         </Paper>
       )}
