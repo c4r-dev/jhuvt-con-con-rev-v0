@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -19,7 +19,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  CircularProgress
 } from '@mui/material';
 
 const chartData = [
@@ -29,7 +30,23 @@ const chartData = [
   { name: 'Other', value: 3 }
 ];
 
-export default function StrategyScreen() {
+// Loading component for suspense
+function LoadingContent() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '50vh',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  )
+}
+
+function StrategyScreen() {
   const searchParams = useSearchParams();
   const [selectedTab, setSelectedTab] = useState(0);
   const [sessionData, setSessionData] = useState([]);
@@ -553,4 +570,12 @@ export default function StrategyScreen() {
       </Box>
     </Container>
   );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<LoadingContent />}>
+      <StrategyScreen />
+    </Suspense>
+  )
 }
