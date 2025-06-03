@@ -182,17 +182,23 @@ function ResearchMethodologyScreen() {
 
       // Case 1: Current user is the only student in the session
       if (otherStudents.length === 0) {
-        const displayOption =
-          currentUserOption === 'Other.' && currentUserCustomOption
-            ? currentUserCustomOption
-            : currentUserOption || 'No option selected'
-        
-        setSelectedStudentOption(displayOption)
-        setSelectedStudentExplanation(
-          currentUserExplanation || 'Your explanation for this choice.'
-        )
-        
-        console.log('Case 1: Only student - showing own option:', displayOption)
+        // Only show current user's option if it's NOT "Set this experiment aside"
+        if (currentUserOption && currentUserOption !== 'Set this experiment aside.') {
+          // For "Other" option, show "Other" instead of the custom text
+          const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
+          
+          setSelectedStudentOption(displayOption)
+          setSelectedStudentExplanation(
+            currentUserExplanation || 'Your explanation for this choice.'
+          )
+          
+          console.log('Case 1: Only student - showing own option:', displayOption)
+        } else {
+          // Current user chose "Set aside" - show default message
+          setSelectedStudentOption('No valid option available.')
+          setSelectedStudentExplanation('No valid option was selected.')
+          console.log('Case 1: Only student chose to set experiment aside')
+        }
         return
       }
 
@@ -211,11 +217,8 @@ function ResearchMethodologyScreen() {
 
         console.log('Selected Student:', selectedStudent) // Debug log
 
-        // Set the selected option (use customOption if it's "Other", otherwise use the main option)
-        const displayOption =
-          selectedStudent.option === 'Other.' && selectedStudent.customOption
-            ? selectedStudent.customOption
-            : selectedStudent.option
+        // For "Other" option, show "Other" instead of the custom text
+        const displayOption = selectedStudent.option === 'Other.' ? 'Other' : selectedStudent.option
 
         setSelectedStudentOption(displayOption)
 
@@ -226,27 +229,30 @@ function ResearchMethodologyScreen() {
 
         console.log('Case 2: Multiple students - showing random other option:', displayOption)
       } else {
-        // All other students chose "Set this experiment aside"
-        setSelectedStudentOption('Other students chose to set experiment aside.')
+        // All other students chose "Set this experiment aside" or current user is alone and chose "Set aside"
+        setSelectedStudentOption('No valid options available.')
         setSelectedStudentExplanation(
-          'No viable options available from other students.'
+          'No valid options available from other students.'
         )
         
-        console.log('Case 2: All other students set experiment aside')
+        console.log('Case 2: No valid options from other students')
       }
 
     } catch (error) {
       console.error('Error fetching student options:', error)
-      // Set fallback values on error - use current user's option as fallback
-      const displayOption =
-        currentUserOption === 'Other.' && currentUserCustomOption
-          ? currentUserCustomOption
-          : currentUserOption || 'Error loading option'
-          
-      setSelectedStudentOption(displayOption)
-      setSelectedStudentExplanation(
-        currentUserExplanation || 'Error loading explanation.'
-      )
+      // Set fallback values on error - use current user's option as fallback only if not "Set aside"
+      if (currentUserOption && currentUserOption !== 'Set this experiment aside.') {
+        // For "Other" option, show "Other" instead of the custom text
+        const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
+            
+        setSelectedStudentOption(displayOption)
+        setSelectedStudentExplanation(
+          currentUserExplanation || 'Error loading explanation.'
+        )
+      } else {
+        setSelectedStudentOption('Error loading option')
+        setSelectedStudentExplanation('Error loading explanation.')
+      }
     }
   }
 
@@ -296,7 +302,7 @@ function ResearchMethodologyScreen() {
 
       <StyledPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
         <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-          Research question: does neuroserpin induce axonal elongation?
+          Research question: Does Neuroserpin induce axonal elongation?
         </Typography>
       </StyledPaper>
 
