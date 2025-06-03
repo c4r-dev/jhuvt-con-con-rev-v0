@@ -45,11 +45,9 @@ const Header = ({ onLogoClick, onHelpClick, text="Randomization in the literatur
                         onClick={handleLogoClick}
                     />
                     <h1 className="header-title">  {text} </h1>
-                    <button className="header-guide-button" onClick={handleHelpClick}>
-                        {/* SVG here */}
-                        {/* <img src={helpTooltip} alt="Guide" className="help-tooltip-image" /> */}
+                    {/* <button className="header-guide-button" onClick={handleHelpClick}>
                         <Image src={helpTooltip} alt="Guide" className="help-tooltip-image" />
-                    </button>
+                    </button> */}
                 </div>
             </div>
          
