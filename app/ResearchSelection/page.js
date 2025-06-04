@@ -622,29 +622,7 @@ function AddressControlConstraint() {
 
   return (
     <Box sx={{ flexGrow: 1, mt: 2 }}>
-      {/* Research Question Box */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          backgroundColor: '#e0e0e0',
-          mb: 2,
-          borderRadius: 1,
-        }}
-      >
-        <Typography
-          variant="h5"
-          component="h3"
-          sx={{
-            fontWeight: 'bold',
-            fontSize: '1.3rem',
-            marginBottom: '10px',
-            color: '#000000',
-          }}
-        >
-          Research question: Does Neuroserpin induce axonal elongation?
-        </Typography>
-      </Paper>
+    
 
       {/* Experiment Box */}
       <Paper

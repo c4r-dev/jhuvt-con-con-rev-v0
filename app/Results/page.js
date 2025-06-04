@@ -265,8 +265,7 @@ function StrategyScreen() {
           Limitation
         </Typography>
         <Typography variant="body2">
-          Oh no! There is a constraint they need to address that complicates the controls they want to use.
-        </Typography>
+Sample Size: Depth electrodes require a much more invasive procedure, which will limit your ability to recruit subjects for the experiment.        </Typography>
       </Alert>
 
       {/* Chart Section */}
@@ -549,25 +548,7 @@ function StrategyScreen() {
         </TableContainer>
       </Paper>
 
-      {/* Submit Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#333',
-            color: 'white',
-            textTransform: 'uppercase',
-            fontWeight: 'bold',
-            px: 4,
-            py: 1.5,
-            '&:hover': {
-              backgroundColor: '#555'
-            }
-          }}
-        >
-          SUBMIT
-        </Button>
-      </Box>
+     
     </Container>
   );
 }

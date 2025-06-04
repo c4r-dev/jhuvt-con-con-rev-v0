@@ -312,11 +312,7 @@ function ResearchMethodologyScreen() {
         </Typography>
       </StyledPaper>
 
-      <StyledPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-          Research question: Does Neuroserpin induce axonal elongation?
-        </Typography>
-      </StyledPaper>
+     
 
       <StyledAccordion
         sx={{
