@@ -467,7 +467,7 @@ function StrategyScreen() {
       </Paper>
 
       {/* Debug Info */}
-      {!loading && (
+      {/* {!loading && (
         <Alert severity="info" sx={{ mb: 3 }}>
           <Typography variant="body2">
             <strong>Debug Info:</strong> Found {sessionData.length} total records, 
@@ -479,7 +479,7 @@ function StrategyScreen() {
             </Typography>
           )}
         </Alert>
-      )}
+      )} */}
 
       {/* Table Section */}
       <Paper elevation={1} sx={{ p: 3, mb: 3, backgroundColor: '#e8e8e8' }}>

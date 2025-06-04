@@ -61,14 +61,14 @@ export async function POST(request) {
     }
 
     // Check if timer has expired *before* saving ideas
-    if (session.timerStartTime) {
-      const startTimeMs = session.timerStartTime.getTime();
-      const durationMs = (session.timerDurationSeconds || defaultDurationSeconds) * 1000;
-      const elapsedMs = now.getTime() - startTimeMs;
-      if (elapsedMs > durationMs) {
-        return NextResponse.json({ message: "Submission time has expired." }, { status: 403 }); // 403 Forbidden
-      }
-    }
+    // if (session.timerStartTime) {
+    //   const startTimeMs = session.timerStartTime.getTime();
+    //   const durationMs = (session.timerDurationSeconds || defaultDurationSeconds) * 1000;
+    //   const elapsedMs = now.getTime() - startTimeMs;
+    //   if (elapsedMs > durationMs) {
+    //     return NextResponse.json({ message: "Submission time has expired." }, { status: 403 }); // 403 Forbidden
+    //   }
+    // }
     // --- End Timer Logic ---
 
     // --- Save Ideas Logic --- 

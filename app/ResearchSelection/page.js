@@ -231,6 +231,7 @@ function AddressControlConstraint() {
 
     if (sessionIdFromUrl) {
       setSessionId(sessionIdFromUrl)
+      console.log('SessionID set to:', sessionIdFromUrl) // Debug log
     }
 
     // Generate unique student ID if not present in URL
@@ -334,13 +335,6 @@ function AddressControlConstraint() {
     // The checkbox will remain checked
   }
 
-  //   const handleOtherDialogSave = () => {
-  //     if (otherOptionText.trim()) {
-  //       setSelectedOption('Other.')
-  //       setShowOtherDialog(false)
-  //     }
-  //   }
-
   const handleOtherDialogSave = () => {
     if (otherOptionText.trim()) {
       setSelectedOption('Other.')
@@ -377,7 +371,7 @@ function AddressControlConstraint() {
     setShowExplanationInput(true)
   }
 
-  const handleExplanationSubmit = () => {
+  const handleExplanationSubmit = async () => {
     // Just save the explanation text to URL without triggering timer
     if (explanationText.trim()) {
       const queryParams = new URLSearchParams(window.location.search)
@@ -389,59 +383,22 @@ function AddressControlConstraint() {
       
       console.log('Explanation saved to URL:', explanationText.trim())
       setExplanationSubmitted(true)
+
+      // Special handling for individual1 session when timer is expired
+      if (sessionId === 'individual1' && timeExpired) {
+        try {
+          // Call the controls API to save user details
+          await saveUrlDataToAPI()
+          console.log('Data saved successfully for individual1 session!')
+        } catch (error) {
+          console.error('Error saving data for individual1 session:', error)
+          // Don't prevent the user from continuing even if save fails
+        }
+      }
     }
   }
 
-  //   const saveUrlDataToAPI = async () => {
-  //     try {
-  //       // Extract all the data from URL and component state
-  //       const urlParams = new URLSearchParams(window.location.search)
-
-  //       // Helper function to clean URL parameter values
-  //       const cleanUrlParam = (value) => {
-  //         if (!value) return value
-  //         return value.replace(/%/g, '')
-  //       }
-
-  //       // Prepare the data payload
-  //       const payload = {
-  //         sessionId: sessionId || urlParams.get('sessionID'),
-  //         studentId: studentId || urlParams.get('studentId'),
-  //         option: selectedOption || cleanUrlParam(urlParams.get('selectedOption')),
-  //         customOption: otherOptionText || cleanUrlParam(urlParams.get('otherOptionText')),
-  //         response: explanationText || cleanUrlParam(urlParams.get('explanation')),
-  //         withinTimer: true // You can modify this based on your timer logic
-  //       }
-
-  //       // Make the POST request to your API
-  //       const response = await fetch('/api/controls', { // Replace with your actual API endpoint
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify(payload)
-  //       })
-
-  //       if (!response.ok) {
-  //         const errorData = await response.json()
-  //         throw new Error(errorData.message || 'Failed to save data')
-  //       }
-
-  //       const result = await response.json()
-  //       console.log('Data saved successfully:', result)
-  //       return result
-
-  //     } catch (error) {
-  //       console.error('Error saving data:', error)
-  //       // You might want to show an error message to the user
-  //       alert('Failed to save data. Please try again.')
-  //       throw error
-  //     }
-  //   }
-
-  // Updated saveUrlDataToAPI to accept a studentId parameter
- // Updated saveUrlDataToAPI to accept a studentId parameter and map options
-// Updated saveUrlDataToAPI to accept a studentId parameter and map options
+  // Updated saveUrlDataToAPI to accept a studentId parameter and map options
   const saveUrlDataToAPI = async (overrideStudentId = null) => {
     try {
       // Extract all the data from URL and component state
@@ -563,45 +520,6 @@ function AddressControlConstraint() {
     }
   }
 
-  //   const handleFinalSubmit = async () => {
-  //     // Navigate to review controls with the session and student IDs and selected option
-  //     const queryParams = new URLSearchParams()
-  //     if (sessionId) queryParams.append('sessionID', sessionId)
-
-  //     // Generate a unique student ID if one doesn't exist, otherwise use existing one
-  //     const finalStudentId = studentId || `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  //     queryParams.append('studentId', finalStudentId)
-  //     if (selectedOption) {
-  //       queryParams.append('selectedOption', selectedOption)
-  //       // If "Other" was selected, also include the custom text
-  //       if (selectedOption === 'Other.' && otherOptionText.trim()) {
-  //         queryParams.append('otherOptionText', otherOptionText.trim())
-  //       }
-  //     }
-  //     if (explanationText.trim()) {
-  //       queryParams.append('explanation', explanationText.trim())
-  //     }
-
-  //     console.log('Navigating with URL params:', queryParams.toString())
-  //     router.push(`/ResearchSelection?${queryParams.toString()}`)
-
-  //     try {
-  //         // Save the current state to the database
-  //         await saveUrlDataToAPI()
-
-  //         // Start your timer logic here
-  //         console.log('Timer started and data saved!')
-
-  //         // You might want to navigate or update UI after successful save
-  //         // router.push('/next-page')
-
-  //       } catch (error) {
-  //         // Handle error - maybe don't start timer if save failed
-  //         console.error('Failed to save data before starting timer')
-  //       }
-
-  //   }
-
   // Updated handleFinalSubmit
   const handleFinalSubmit = async () => {
     if (finalSubmitted) return // Prevent multiple submissions
@@ -672,6 +590,18 @@ function AddressControlConstraint() {
 
     console.log('Navigating with URL params:', queryParams.toString())
     router.push(`/ResearchMethodology?${queryParams.toString()}`)
+  }
+
+  // Helper function to determine if navigation button should be enabled
+  const isNavigationEnabled = () => {
+    console.log('Checking navigation conditions:')
+    console.log('- finalSubmitted:', finalSubmitted)
+    console.log('- sessionId:', sessionId)
+    console.log('- timeExpired:', timeExpired)
+    console.log('- sessionId === "individual1":', sessionId === 'individual1')
+    console.log('- Special condition met:', sessionId === 'individual1' && timeExpired)
+    
+    return finalSubmitted || (sessionId === 'individual1' && timeExpired)
   }
 
   return (
@@ -1228,7 +1158,6 @@ function AddressControlConstraint() {
       )}
 
       {/* Final Submit Button - Show when explanation input is visible */}
-      {/* Final Submit Button - Show when explanation input is visible */}
       {showExplanationInput && (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
           <Button
@@ -1260,16 +1189,16 @@ function AddressControlConstraint() {
           <Button
             variant="contained"
             onClick={handleNavigateToNext}
-            disabled={!finalSubmitted}
+            disabled={!isNavigationEnabled()}
             sx={{
-              bgcolor: finalSubmitted ? '#000000' : '#cccccc',
-              color: finalSubmitted ? 'white' : '#666666',
+              bgcolor: isNavigationEnabled() ? '#000000' : '#cccccc',
+              color: isNavigationEnabled() ? 'white' : '#666666',
               px: 4,
               py: 1.5,
               fontWeight: 'bold',
               fontSize: '1rem',
               '&:hover': {
-                bgcolor: finalSubmitted ? '#333333' : '#cccccc',
+                bgcolor: isNavigationEnabled() ? '#333333' : '#cccccc',
               },
               '&:disabled': {
                 bgcolor: '#cccccc',
