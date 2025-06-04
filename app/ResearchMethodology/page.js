@@ -327,7 +327,7 @@ function ResearchMethodologyScreen() {
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-            Experiment
+            Experiment: What brain regions integrate audio perception?
           </Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ backgroundColor: '#e0e0e0 !important' }}>
@@ -364,9 +364,7 @@ function ResearchMethodologyScreen() {
         </AccordionSummary>
         <AccordionDetails sx={{ backgroundColor: '#e0e0e0 !important' }}>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Use depth electrodes: Include readings from depth electrodes which
-            provide high spatial resolution and signal fidelity, enabling
-            measurement of potential effects in other major cortical hubs.
+            Include readings from depth electrodes which provide high spatial resolution and signal fidelity, enabling measurement of potential effects in other major cortical hubs.
           </Typography>
         </AccordionDetails>
       </StyledAccordion>
@@ -377,11 +375,10 @@ function ResearchMethodologyScreen() {
           component="h2"
           sx={{ fontWeight: 'bold', color: '#ff5722', mb: 1 }}
         >
-          Limitation
+          Limitation: sample size
         </Typography>
         <Typography variant="body2" >
-          Sample Size: Depth electrodes require a much more invasive procedure,
-          which will limit your ability to recruit subjects for the experiment.
+        Depth electrodes require a much more invasive procedure, which will limit your ability to recruit subjects for the experiment.
         </Typography>
       </LimitationPaper>
 

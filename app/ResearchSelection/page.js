@@ -236,12 +236,14 @@ function AddressControlConstraint() {
 
     // Generate unique student ID if not present in URL
     if (!studentIdFromUrl) {
-      studentIdFromUrl = `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      
+      studentIdFromUrl = `student_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`
+
       // Add the generated student ID to the URL
       const queryParams = new URLSearchParams(window.location.search)
       queryParams.set('studentId', studentIdFromUrl)
-      
+
       // Update the URL without navigating
       const newUrl = `${window.location.pathname}?${queryParams.toString()}`
       window.history.replaceState({}, '', newUrl)
@@ -266,7 +268,10 @@ function AddressControlConstraint() {
     }
 
     console.log('Session ID from URL:', sessionIdFromUrl)
-    console.log('Student ID from URL (generated or existing):', studentIdFromUrl)
+    console.log(
+      'Student ID from URL (generated or existing):',
+      studentIdFromUrl,
+    )
     console.log('Selected Option from URL:', selectedOptionFromUrl)
     console.log('Custom Option from URL:', customOptionFromUrl)
     console.log('Explanation from URL:', explanationFromUrl)
@@ -299,7 +304,7 @@ function AddressControlConstraint() {
       // Add selected option to URL immediately
       const queryParams = new URLSearchParams(window.location.search)
       queryParams.set('selectedOption', option)
-      
+
       // Update the URL without navigating
       const newUrl = `${window.location.pathname}?${queryParams.toString()}`
       window.history.replaceState({}, '', newUrl)
@@ -310,20 +315,22 @@ function AddressControlConstraint() {
       }
     } else {
       setSelectedOption('')
-      
+
       // Remove selected option from URL when unchecked
       const queryParams = new URLSearchParams(window.location.search)
       queryParams.delete('selectedOption')
-      
+
       // Update the URL without navigating
       const newUrl = `${window.location.pathname}?${queryParams.toString()}`
       window.history.replaceState({}, '', newUrl)
-      
+
       if (option === 'Other.') {
         setOtherOptionText('')
         // Also remove custom option from URL
         queryParams.delete('otherOptionText')
-        const updatedUrl = `${window.location.pathname}?${queryParams.toString()}`
+        const updatedUrl = `${
+          window.location.pathname
+        }?${queryParams.toString()}`
         window.history.replaceState({}, '', updatedUrl)
       }
     }
@@ -376,11 +383,11 @@ function AddressControlConstraint() {
     if (explanationText.trim()) {
       const queryParams = new URLSearchParams(window.location.search)
       queryParams.set('explanation', explanationText.trim())
-      
+
       // Update the URL without navigating
       const newUrl = `${window.location.pathname}?${queryParams.toString()}`
       window.history.replaceState({}, '', newUrl)
-      
+
       console.log('Explanation saved to URL:', explanationText.trim())
       setExplanationSubmitted(true)
 
@@ -445,7 +452,8 @@ function AddressControlConstraint() {
         `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
       // Get the current option and map it for the API
-      const currentOption = selectedOption || cleanUrlParam(urlParams.get('selectedOption'))
+      const currentOption =
+        selectedOption || cleanUrlParam(urlParams.get('selectedOption'))
       const mappedOption = mapOptionForAPI(currentOption)
 
       console.log('Original option:', currentOption)
@@ -529,9 +537,9 @@ function AddressControlConstraint() {
   // Updated handleFinalSubmit
   const handleFinalSubmit = async () => {
     if (finalSubmitted) return // Prevent multiple submissions
-    
+
     setFinalSubmitted(true) // Disable button immediately
-    
+
     try {
       // Get the current URL params to extract studentId if it exists
       const urlParams = new URLSearchParams(window.location.search)
@@ -605,25 +613,29 @@ function AddressControlConstraint() {
     console.log('- finalSubmitted:', finalSubmitted)
     console.log('- timeExpired:', timeExpired)
     console.log('- sessionId:', sessionId)
-    
+
     // Logic based on timer status:
     if (!timeExpired) {
       // Timer is NOT expired: enable button only after BOTH explanation submit AND final submit
       const shouldEnable = explanationSubmitted && finalSubmitted
-      console.log('- Timer not expired: need both explanation and final submit:', shouldEnable)
+      console.log(
+        '- Timer not expired: need both explanation and final submit:',
+        shouldEnable,
+      )
       return shouldEnable
     } else {
       // Timer IS expired: enable button only after explanation submit
       const shouldEnable = explanationSubmitted
-      console.log('- Timer expired: need only explanation submit:', shouldEnable)
+      console.log(
+        '- Timer expired: need only explanation submit:',
+        shouldEnable,
+      )
       return shouldEnable
     }
   }
 
   return (
     <Box sx={{ flexGrow: 1, mt: 2 }}>
-    
-
       {/* Experiment Box */}
       <Paper
         elevation={0}
@@ -644,7 +656,7 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-          Experiment
+          Experiment: What brain regions integrate audio perception?
         </Typography>
         <Typography
           variant="body1"
@@ -654,7 +666,13 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-         In order to study the neural dynamics of perceptual integration, subjects listen to a sequence of tones experienced either as a single audio stream or as two parallel audio streams. Neurophysiological indices of information integration are calculated from scalp EEG recordings, identifying a functional network spanning two brain regions which is claimed to be responsible for perceptual integration and differentiation.
+          In order to study the neural dynamics of perceptual integration,
+          subjects listen to a sequence of tones experienced either as a single
+          audio stream or as two parallel audio streams. Neurophysiological
+          indices of information integration are calculated from scalp EEG
+          recordings, identifying a functional network spanning two brain
+          regions which is claimed to be responsible for perceptual integration
+          and differentiation.
         </Typography>
       </Paper>
 
@@ -680,7 +698,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Concern
+            Concern: Unverified regional specificity.
           </Typography>
           <Typography
             variant="body1"
@@ -690,7 +708,10 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-           Unverified regional specificity: There is no confirmation that the observed information transfer is specific the monitored brain regions, so any claim describing neural dynamics would be predicated on the assumption that the findings aren&apos;t confounded by other regions or connections.
+            There is no confirmation that the observed information transfer is
+            specific the monitored brain regions, so any claim describing neural
+            dynamics would be predicated on the assumption that the findings
+            aren&apos;t confounded by other regions or connections.{' '}
           </Typography>
         </Paper>
       )}
@@ -717,7 +738,7 @@ function AddressControlConstraint() {
               color: '#4caf50',
             }}
           >
-            Proposed control
+            Proposed control: use depth electrodes
           </Typography>
           <Typography
             variant="body1"
@@ -727,7 +748,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Use depth electrodes: Include readings from depth electrodes which provide high spatial resolution and signal fidelity, enabling measurement of potential effects in other major cortical hubs.
+           Include readings from depth electrodes which provide high spatial resolution and signal fidelity, enabling measurement of potential effects in other major cortical hubs.
           </Typography>
         </Paper>
       )}
@@ -753,7 +774,7 @@ function AddressControlConstraint() {
               color: '#ff7043',
             }}
           >
-            Limitation
+          Limitation: sample size
           </Typography>
           <Typography
             variant="body1"
@@ -763,7 +784,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-           Sample Size: Depth electrodes require a much more invasive procedure, which will limit your ability to recruit subjects for the experiment.
+Depth electrodes require a much more invasive procedure, which will limit your ability to recruit subjects for the experiment.
           </Typography>
         </Paper>
       )}
@@ -928,15 +949,24 @@ function AddressControlConstraint() {
                 position: 'absolute',
                 bottom: 8,
                 right: 8,
-                bgcolor: explanationText.trim() && !explanationSubmitted ? '#000000' : '#cccccc',
-                color: explanationText.trim() && !explanationSubmitted ? 'white' : '#666666',
+                bgcolor:
+                  explanationText.trim() && !explanationSubmitted
+                    ? '#000000'
+                    : '#cccccc',
+                color:
+                  explanationText.trim() && !explanationSubmitted
+                    ? 'white'
+                    : '#666666',
                 minWidth: 'auto',
                 px: 2,
                 py: 0.5,
                 fontSize: '0.875rem',
                 fontWeight: 'bold',
                 '&:hover': {
-                  bgcolor: explanationText.trim() && !explanationSubmitted ? '#333333' : '#cccccc',
+                  bgcolor:
+                    explanationText.trim() && !explanationSubmitted
+                      ? '#333333'
+                      : '#cccccc',
                 },
                 '&:disabled': {
                   bgcolor: '#cccccc',
@@ -1065,7 +1095,7 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-           ADDRESS THE CONCERN
+            ADDRESS THE CONCERN
           </Button>
         </Box>
       )}
@@ -1090,7 +1120,7 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-           THERE&apos;S A PROBLEM!
+            THERE&apos;S A PROBLEM!
           </Button>
         </Box>
       )}
@@ -1115,7 +1145,7 @@ function AddressControlConstraint() {
               textTransform: 'uppercase',
             }}
           >
-           WHAT SHOULD BE DONE?
+            WHAT SHOULD BE DONE?
           </Button>
         </Box>
       )}
@@ -1159,14 +1189,23 @@ function AddressControlConstraint() {
             onClick={handleFinalSubmit}
             disabled={!explanationText.trim() || finalSubmitted || timeExpired}
             sx={{
-              bgcolor: explanationText.trim() && !finalSubmitted && !timeExpired ? '#000000' : '#cccccc',
-              color: explanationText.trim() && !finalSubmitted && !timeExpired ? 'white' : '#666666',
+              bgcolor:
+                explanationText.trim() && !finalSubmitted && !timeExpired
+                  ? '#000000'
+                  : '#cccccc',
+              color:
+                explanationText.trim() && !finalSubmitted && !timeExpired
+                  ? 'white'
+                  : '#666666',
               px: 4,
               py: 1.5,
               fontWeight: 'bold',
               fontSize: '1rem',
               '&:hover': {
-                bgcolor: explanationText.trim() && !finalSubmitted && !timeExpired ? '#333333' : '#cccccc',
+                bgcolor:
+                  explanationText.trim() && !finalSubmitted && !timeExpired
+                    ? '#333333'
+                    : '#cccccc',
               },
               '&:disabled': {
                 bgcolor: '#cccccc',
@@ -1179,7 +1218,7 @@ function AddressControlConstraint() {
           >
             {finalSubmitted ? 'SUBMITTED' : 'SUBMIT AND START GROUP COUNTDOWN'}
           </Button>
-          
+
           <Button
             variant="contained"
             onClick={handleNavigateToNext}
