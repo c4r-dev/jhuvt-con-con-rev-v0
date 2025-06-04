@@ -99,6 +99,7 @@ function ResearchMethodologyScreen() {
   const [currentStudentId, setCurrentStudentId] = useState(null)
   const [currentUserOption, setCurrentUserOption] = useState('')
   const [currentUserCustomOption, setCurrentUserCustomOption] = useState('')
+  const [noValidOptions, setNoValidOptions] = useState(false) // New state to track if no valid options
 
   useEffect(() => {
     const sessionIdFromUrl = searchParams.get('sessionID')
@@ -150,8 +151,8 @@ function ResearchMethodologyScreen() {
       }
       const apiResponse = await response.json()
 
-      console.log('API Response:', apiResponse) // Debug log
-      console.log('Current Student ID:', currentStudentId) // Debug log
+      console.log('API Response:', apiResponse)
+      console.log('Current Student ID:', currentStudentId)
 
       // Extract students array from the nested response structure
       let studentsArray = []
@@ -171,99 +172,93 @@ function ResearchMethodologyScreen() {
         studentsArray = []
       }
 
-      console.log('All students:', studentsArray) // Debug log
+      console.log('All students:', studentsArray)
+
+      // Find current user in the session to check their withinTimer status
+      const currentUser = studentsArray.find(student => student.studentId === currentStudentId)
+      const currentUserWithinTimer = currentUser ? currentUser.withinTimer !== false : true
+
+      console.log('Current user data:', currentUser)
+      console.log('Current user withinTimer:', currentUserWithinTimer)
+
+      // Helper function to check if an option is valid
+      const isValidOption = (student) => {
+        const hasValidOption = student.option && student.option !== 'Set this experiment aside.'
+        const withinTimer = student.withinTimer !== false
+        return hasValidOption && withinTimer
+      }
 
       // Filter out the current student to get other students
       const otherStudents = studentsArray.filter((student) => 
         student.studentId !== currentStudentId
       )
 
-      console.log('Other students:', otherStudents) // Debug log
+      console.log('Other students:', otherStudents)
 
       // Case 1: Current user is the only student in the session
       if (otherStudents.length === 0) {
-        // Only show current user's option if it's NOT "Set this experiment aside"
-        if (currentUserOption && currentUserOption !== 'Set this experiment aside.') {
-          // For "Other" option, show "Other" instead of the custom text
+        if (currentUserOption && currentUserOption !== 'Set this experiment aside.' && currentUserWithinTimer) {
           const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
-          
           setSelectedStudentOption(displayOption)
-          setSelectedStudentExplanation(
-            currentUserExplanation || 'Your explanation for this choice.'
-          )
-          
+          setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
+          setNoValidOptions(false)
           console.log('Case 1: Only student - showing own option:', displayOption)
         } else {
-          // Current user chose "Set aside" - show default message
-          setSelectedStudentOption('No valid option available.')
-          setSelectedStudentExplanation('No valid option was selected.')
-          console.log('Case 1: Only student chose to set experiment aside')
+          setSelectedStudentOption('No valid options available.')
+          setSelectedStudentExplanation('No valid options were selected within the time limit.')
+          setNoValidOptions(true)
+          console.log('Case 1: Only student chose to set experiment aside or outside time limit')
         }
         return
       }
 
-      // Case 2: There are other students - randomly select a different option
-      // Filter out students with "Set this experiment aside" option AND withinTimer: false
-      const validOtherStudents = otherStudents.filter((student) => {
-        const hasValidOption = student.option && student.option !== 'Set this experiment aside.'
-        const withinTimer = student.withinTimer !== false // Include students with withinTimer: true or undefined/null
-        
-        console.log(`Student ${student.studentId}:`, {
-          option: student.option,
-          withinTimer: student.withinTimer,
-          hasValidOption,
-          withinTimer,
-          included: hasValidOption && withinTimer
-        })
-        
-        return hasValidOption && withinTimer
-      })
+      // Case 2: There are other students - first try to find valid options from others
+      const validOtherStudents = otherStudents.filter(isValidOption)
 
-      console.log('Valid other students (after withinTimer filter):', validOtherStudents) // Debug log
+      console.log('Valid other students:', validOtherStudents)
 
       if (validOtherStudents.length > 0) {
         // Randomly select one option from other students
         const randomIndex = Math.floor(Math.random() * validOtherStudents.length)
         const selectedStudent = validOtherStudents[randomIndex]
 
-        console.log('Selected Student:', selectedStudent) // Debug log
-        console.log('Selected Student withinTimer:', selectedStudent.withinTimer) // Debug log
+        console.log('Selected Student:', selectedStudent)
 
-        // For "Other" option, show "Other" instead of the custom text
         const displayOption = selectedStudent.option === 'Other.' ? 'Other' : selectedStudent.option
-
         setSelectedStudentOption(displayOption)
-
-        // Set the explanation if available
-        setSelectedStudentExplanation(
-          selectedStudent.response || 'No explanation provided by this student.'
-        )
-
+        setSelectedStudentExplanation(selectedStudent.response || 'No explanation provided by this student.')
+        setNoValidOptions(false)
         console.log('Case 2: Multiple students - showing random other option:', displayOption)
       } else {
-        // All other students chose "Set this experiment aside" or have withinTimer: false, or current user is alone and chose "Set aside"
-        setSelectedStudentOption('No valid options available.')
-        setSelectedStudentExplanation(
-          'No valid options available from other students who submitted within the time limit.'
-        )
-        
-        console.log('Case 2: No valid options from other students (after withinTimer filter)')
+        // Case 3: All other students chose "Set aside" or are outside time limit
+        // Fall back to current user's option if it's valid
+        if (currentUserOption && currentUserOption !== 'Set this experiment aside.' && currentUserWithinTimer) {
+          const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
+          setSelectedStudentOption(displayOption)
+          setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
+          setNoValidOptions(false)
+          console.log('Case 3: All others invalid - showing current user option:', displayOption)
+        } else {
+          // Final fallback: No valid options available
+          setSelectedStudentOption('No valid options available.')
+          setSelectedStudentExplanation('No valid options were selected within the time limit.')
+          setNoValidOptions(true)
+          console.log('Final fallback: No valid options from any students')
+        }
       }
 
     } catch (error) {
       console.error('Error fetching student options:', error)
-      // Set fallback values on error - use current user's option as fallback only if not "Set aside"
+      // Set fallback values on error
       if (currentUserOption && currentUserOption !== 'Set this experiment aside.') {
-        // For "Other" option, show "Other" instead of the custom text
         const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
-            
         setSelectedStudentOption(displayOption)
-        setSelectedStudentExplanation(
-          currentUserExplanation || 'Error loading explanation.'
-        )
+        setSelectedStudentExplanation(currentUserExplanation || 'Error loading explanation.')
+        setNoValidOptions(false)
       } else {
         setSelectedStudentOption('Error loading option')
         setSelectedStudentExplanation('Error loading explanation.')
+        setNoValidOptions(true)
       }
     }
   }
@@ -301,6 +296,10 @@ function ResearchMethodologyScreen() {
     }
   }
 
+  const handleNavigateToResults = () => {
+    router.push(`/Results?sessionID=${sessionId}`)
+  }
+
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
       <StyledPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
@@ -311,8 +310,6 @@ function ResearchMethodologyScreen() {
           implications would you expect the authors to report?
         </Typography>
       </StyledPaper>
-
-     
 
       <StyledAccordion
         sx={{
@@ -343,7 +340,7 @@ function ResearchMethodologyScreen() {
         </AccordionDetails>
       </StyledAccordion>
 
-       <StyledAccordion
+      <StyledAccordion
         sx={{
           backgroundColor: '#e0e0e0 !important',
           '& .MuiAccordionSummary-root': {
@@ -397,9 +394,21 @@ function ResearchMethodologyScreen() {
             />
           }
           label={
-            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-              {selectedStudentOption || 'Loading...'}
-            </Typography>
+            <Box>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                {selectedStudentOption || 'Loading...'}
+              </Typography>
+              {selectedStudentOption === 'Compromise option 1.' && (
+                <Typography variant="body2" sx={{ mt: 1, color: '#666', fontStyle: 'italic' }}>
+                  Run a depth electrode pilot study in a single clinical participant.
+                </Typography>
+              )}
+              {selectedStudentOption === 'Compromise option 2.' && (
+                <Typography variant="body2" sx={{ mt: 1, color: '#666', fontStyle: 'italic' }}>
+                  Use computational methods to estimate which cortical regions generated each scalp signal, then measure mutual information between those reconstructed regions.
+                </Typography>
+              )}
+            </Box>
           }
         />
       </CompromisePaper>
@@ -425,58 +434,80 @@ function ResearchMethodologyScreen() {
         )}
       </ExplanationPaper>
 
-      <AnswerFieldPaper elevation={1}  sx={{ backgroundColor: '#e0e0e0' }}>
-        <TextField
-          multiline
-          rows={4}
-          fullWidth
-          placeholder="Explain the limits of this choice..."
-          variant="standard"
-          value={limitExplanation}
-          onChange={(e) => setLimitExplanation(e.target.value)}
-          disabled={submitted}
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              fontSize: '0.9rem',
-              backgroundColor: submitted ? '#f5f5f5' : 'transparent',
-              '& .MuiInputBase-input::placeholder': {
-                color: '#888',
-                opacity: 1,
+      {/* Only show the text field if there are valid options */}
+      {!noValidOptions && (
+        <AnswerFieldPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
+          <TextField
+            multiline
+            rows={4}
+            fullWidth
+            placeholder="Explain the limits of this choice..."
+            variant="standard"
+            value={limitExplanation}
+            onChange={(e) => setLimitExplanation(e.target.value)}
+            disabled={submitted}
+            InputProps={{
+              disableUnderline: true,
+              sx: {
+                fontSize: '0.9rem',
+                backgroundColor: submitted ? '#f5f5f5' : 'transparent',
+                '& .MuiInputBase-input::placeholder': {
+                  color: '#888',
+                  opacity: 1,
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: '#f5f5f5',
+                  color: '#666',
+                },
               },
-              '&.Mui-disabled': {
-                backgroundColor: '#f5f5f5',
-                color: '#666',
-              },
-            },
-          }}
-        />
-      </AnswerFieldPaper>
+            }}
+          />
+        </AnswerFieldPaper>
+      )}
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-        <Button
-          variant="contained"
-          disabled={submitted || !limitExplanation.trim()}
-          onClick={handleSubmit}
-          sx={{
-            backgroundColor:
-              !submitted && limitExplanation.trim() ? '#333' : '#ccc',
-            color: !submitted && limitExplanation.trim() ? 'white' : '#666',
-            px: 4,
-            py: 1,
-            fontWeight: 'bold',
-            '&:hover': {
+        {noValidOptions ? (
+          <Button
+            variant="contained"
+            onClick={handleNavigateToResults}
+            sx={{
+              backgroundColor: '#333',
+              color: 'white',
+              px: 4,
+              py: 1,
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#555',
+              },
+            }}
+          >
+            CONTINUE TO RESULTS
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            disabled={submitted || !limitExplanation.trim()}
+            onClick={handleSubmit}
+            sx={{
               backgroundColor:
-                !submitted && limitExplanation.trim() ? '#555' : '#ccc',
-            },
-            '&:disabled': {
-              backgroundColor: '#ccc',
-              color: '#666',
-            },
-          }}
-        >
-          {submitted ? 'SUBMITTED' : 'SUBMIT'}
-        </Button>
+                !submitted && limitExplanation.trim() ? '#333' : '#ccc',
+              color: !submitted && limitExplanation.trim() ? 'white' : '#666',
+              px: 4,
+              py: 1,
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor:
+                  !submitted && limitExplanation.trim() ? '#555' : '#ccc',
+              },
+              '&:disabled': {
+                backgroundColor: '#ccc',
+                color: '#666',
+              },
+            }}
+          >
+            {submitted ? 'SUBMITTED' : 'SUBMIT'}
+          </Button>
+        )}
       </Box>
     </Container>
   )
