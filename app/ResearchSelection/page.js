@@ -385,7 +385,7 @@ function AddressControlConstraint() {
       setExplanationSubmitted(true)
 
       // Special handling for individual1 session when timer is expired
-      if (sessionId === 'individual1' && timeExpired) {
+      if ( timeExpired) {
         try {
           // Call the controls API to save user details
           await saveUrlDataToAPI()
@@ -593,16 +593,38 @@ function AddressControlConstraint() {
   }
 
   // Helper function to determine if navigation button should be enabled
-  const isNavigationEnabled = () => {
-    console.log('Checking navigation conditions:')
-    console.log('- finalSubmitted:', finalSubmitted)
-    console.log('- sessionId:', sessionId)
-    console.log('- timeExpired:', timeExpired)
-    console.log('- sessionId === "individual1":', sessionId === 'individual1')
-    console.log('- Special condition met:', sessionId === 'individual1' && timeExpired)
+  // const isNavigationEnabled = () => {
+  //   console.log('Checking navigation conditions:')
+  //   console.log('- finalSubmitted:', finalSubmitted)
+  //   console.log('- sessionId:', sessionId)
+  //   console.log('- timeExpired:', timeExpired)
+  //   console.log('- sessionId === "individual1":', sessionId === 'individual1')
+  //   console.log('- Special condition met:', sessionId === 'individual1' && timeExpired)
     
-    return finalSubmitted || (sessionId === 'individual1' && timeExpired)
+  //   return finalSubmitted || (sessionId === 'individual1' && timeExpired)
+  // }
+
+  // Helper function to determine if navigation button should be enabled
+const isNavigationEnabled = () => {
+  console.log('Checking navigation conditions:')
+  console.log('- explanationSubmitted:', explanationSubmitted)
+  console.log('- finalSubmitted:', finalSubmitted)
+  console.log('- timeExpired:', timeExpired)
+  console.log('- sessionId:', sessionId)
+  
+  // Logic based on timer status:
+  if (!timeExpired) {
+    // Timer is NOT expired: enable button only after BOTH explanation submit AND final submit
+    const shouldEnable = explanationSubmitted && finalSubmitted
+    console.log('- Timer not expired: need both explanation and final submit:', shouldEnable)
+    return shouldEnable
+  } else {
+    // Timer IS expired: enable button only after explanation submit
+    const shouldEnable = explanationSubmitted
+    console.log('- Timer expired: need only explanation submit:', shouldEnable)
+    return shouldEnable
   }
+}
 
   return (
     <Box sx={{ flexGrow: 1, mt: 2 }}>
