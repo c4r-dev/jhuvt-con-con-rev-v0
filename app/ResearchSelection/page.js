@@ -384,14 +384,14 @@ function AddressControlConstraint() {
       console.log('Explanation saved to URL:', explanationText.trim())
       setExplanationSubmitted(true)
 
-      // Special handling for individual1 session when timer is expired
-      if ( timeExpired) {
+      // Special handling when timer is expired
+      if (timeExpired) {
         try {
           // Call the controls API to save user details
           await saveUrlDataToAPI()
-          console.log('Data saved successfully for individual1 session!')
+          console.log('Data saved successfully when timer expired!')
         } catch (error) {
-          console.error('Error saving data for individual1 session:', error)
+          console.error('Error saving data when timer expired:', error)
           // Don't prevent the user from continuing even if save fails
         }
       }
@@ -451,6 +451,10 @@ function AddressControlConstraint() {
       console.log('Original option:', currentOption)
       console.log('Mapped option for API:', mappedOption)
 
+      // Determine withinTimer based on timeExpired state
+      const withinTimer = !timeExpired
+      console.log('Timer expired:', timeExpired, '-> withinTimer:', withinTimer)
+
       // Prepare the data payload
       const payload = {
         sessionId: sessionId || cleanUrlParam(urlParams.get('sessionID')),
@@ -460,7 +464,7 @@ function AddressControlConstraint() {
           otherOptionText || cleanUrlParam(urlParams.get('otherOptionText')),
         response:
           explanationText || cleanUrlParam(urlParams.get('explanation')),
-        withinTimer: true, // You can modify this based on your timer logic
+        withinTimer: withinTimer, // Set based on timer status
       }
 
       console.log('Payload being sent:', payload)
@@ -489,6 +493,7 @@ function AddressControlConstraint() {
       const result = await response.json()
       console.log('Data saved successfully:', result)
 
+      // Also send withinTimer to the saveRandomizationIdeas API
       const response1 = await fetch('/api/saveRandomizationIdeas', {
         method: 'POST',
         headers: {
@@ -497,6 +502,7 @@ function AddressControlConstraint() {
         body: JSON.stringify({
           ideas: ['zscdsvdsfdfsdfsd'], // Replace with actual ideas array
           sessionID: sessionId,
+          withinTimer: withinTimer, // Add withinTimer here too
         }),
       })
       const result1 = await response1.json()
@@ -593,38 +599,26 @@ function AddressControlConstraint() {
   }
 
   // Helper function to determine if navigation button should be enabled
-  // const isNavigationEnabled = () => {
-  //   console.log('Checking navigation conditions:')
-  //   console.log('- finalSubmitted:', finalSubmitted)
-  //   console.log('- sessionId:', sessionId)
-  //   console.log('- timeExpired:', timeExpired)
-  //   console.log('- sessionId === "individual1":', sessionId === 'individual1')
-  //   console.log('- Special condition met:', sessionId === 'individual1' && timeExpired)
+  const isNavigationEnabled = () => {
+    console.log('Checking navigation conditions:')
+    console.log('- explanationSubmitted:', explanationSubmitted)
+    console.log('- finalSubmitted:', finalSubmitted)
+    console.log('- timeExpired:', timeExpired)
+    console.log('- sessionId:', sessionId)
     
-  //   return finalSubmitted || (sessionId === 'individual1' && timeExpired)
-  // }
-
-  // Helper function to determine if navigation button should be enabled
-const isNavigationEnabled = () => {
-  console.log('Checking navigation conditions:')
-  console.log('- explanationSubmitted:', explanationSubmitted)
-  console.log('- finalSubmitted:', finalSubmitted)
-  console.log('- timeExpired:', timeExpired)
-  console.log('- sessionId:', sessionId)
-  
-  // Logic based on timer status:
-  if (!timeExpired) {
-    // Timer is NOT expired: enable button only after BOTH explanation submit AND final submit
-    const shouldEnable = explanationSubmitted && finalSubmitted
-    console.log('- Timer not expired: need both explanation and final submit:', shouldEnable)
-    return shouldEnable
-  } else {
-    // Timer IS expired: enable button only after explanation submit
-    const shouldEnable = explanationSubmitted
-    console.log('- Timer expired: need only explanation submit:', shouldEnable)
-    return shouldEnable
+    // Logic based on timer status:
+    if (!timeExpired) {
+      // Timer is NOT expired: enable button only after BOTH explanation submit AND final submit
+      const shouldEnable = explanationSubmitted && finalSubmitted
+      console.log('- Timer not expired: need both explanation and final submit:', shouldEnable)
+      return shouldEnable
+    } else {
+      // Timer IS expired: enable button only after explanation submit
+      const shouldEnable = explanationSubmitted
+      console.log('- Timer expired: need only explanation submit:', shouldEnable)
+      return shouldEnable
+    }
   }
-}
 
   return (
     <Box sx={{ flexGrow: 1, mt: 2 }}>

@@ -203,12 +203,23 @@ function ResearchMethodologyScreen() {
       }
 
       // Case 2: There are other students - randomly select a different option
-      // Filter out students with "Set this experiment aside" option
-      const validOtherStudents = otherStudents.filter((student) => 
-        student.option && student.option !== 'Set this experiment aside.'
-      )
+      // Filter out students with "Set this experiment aside" option AND withinTimer: false
+      const validOtherStudents = otherStudents.filter((student) => {
+        const hasValidOption = student.option && student.option !== 'Set this experiment aside.'
+        const withinTimer = student.withinTimer !== false // Include students with withinTimer: true or undefined/null
+        
+        console.log(`Student ${student.studentId}:`, {
+          option: student.option,
+          withinTimer: student.withinTimer,
+          hasValidOption,
+          withinTimer,
+          included: hasValidOption && withinTimer
+        })
+        
+        return hasValidOption && withinTimer
+      })
 
-      console.log('Valid other students:', validOtherStudents) // Debug log
+      console.log('Valid other students (after withinTimer filter):', validOtherStudents) // Debug log
 
       if (validOtherStudents.length > 0) {
         // Randomly select one option from other students
@@ -216,6 +227,7 @@ function ResearchMethodologyScreen() {
         const selectedStudent = validOtherStudents[randomIndex]
 
         console.log('Selected Student:', selectedStudent) // Debug log
+        console.log('Selected Student withinTimer:', selectedStudent.withinTimer) // Debug log
 
         // For "Other" option, show "Other" instead of the custom text
         const displayOption = selectedStudent.option === 'Other.' ? 'Other' : selectedStudent.option
@@ -229,13 +241,13 @@ function ResearchMethodologyScreen() {
 
         console.log('Case 2: Multiple students - showing random other option:', displayOption)
       } else {
-        // All other students chose "Set this experiment aside" or current user is alone and chose "Set aside"
+        // All other students chose "Set this experiment aside" or have withinTimer: false, or current user is alone and chose "Set aside"
         setSelectedStudentOption('No valid options available.')
         setSelectedStudentExplanation(
-          'No valid options available from other students.'
+          'No valid options available from other students who submitted within the time limit.'
         )
         
-        console.log('Case 2: No valid options from other students')
+        console.log('Case 2: No valid options from other students (after withinTimer filter)')
       }
 
     } catch (error) {
