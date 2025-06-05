@@ -95,7 +95,7 @@ function AddressControlConstraint() {
             color: '#000000',
           }}
         >
-          Experiment
+        Experiment: What brain regions integrate audio perception?
         </Typography>
         <Typography 
           variant="body1"
