@@ -95,12 +95,13 @@ function ResearchMethodologyScreen() {
   const [submitted, setSubmitted] = useState(false)
   const [selectedStudentOption, setSelectedStudentOption] = useState('')
   const [selectedStudentExplanation, setSelectedStudentExplanation] = useState('')
+  const [selectedStudentCustomOption, setSelectedStudentCustomOption] = useState('') // NEW: Store custom option
   const [sessionId, setSessionId] = useState(null)
   const [currentStudentId, setCurrentStudentId] = useState(null)
   const [currentUserOption, setCurrentUserOption] = useState('')
   const [currentUserCustomOption, setCurrentUserCustomOption] = useState('')
   const [noValidOptions, setNoValidOptions] = useState(false)
-  const [displayedOptionStudentId, setDisplayedOptionStudentId] = useState(null) // NEW: Track whose option is displayed
+  const [displayedOptionStudentId, setDisplayedOptionStudentId] = useState(null)
 
   useEffect(() => {
     const sessionIdFromUrl = searchParams.get('sessionID')
@@ -202,13 +203,15 @@ function ResearchMethodologyScreen() {
           const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
           setSelectedStudentOption(displayOption)
           setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
-          setDisplayedOptionStudentId(currentStudentId) // Track that current user's option is displayed
+          setSelectedStudentCustomOption(currentUserCustomOption || '') // Set custom option
+          setDisplayedOptionStudentId(currentStudentId)
           setNoValidOptions(false)
           console.log('Case 1: Only student - showing own option:', displayOption)
         } else {
           setSelectedStudentOption('No valid options available.')
           setSelectedStudentExplanation('No valid options were selected within the time limit.')
-          setDisplayedOptionStudentId(null) // No valid option to track
+          setSelectedStudentCustomOption('') // Clear custom option
+          setDisplayedOptionStudentId(null)
           setNoValidOptions(true)
           console.log('Case 1: Only student chose to set experiment aside or outside time limit')
         }
@@ -230,7 +233,8 @@ function ResearchMethodologyScreen() {
         const displayOption = selectedStudent.option === 'Other.' ? 'Other' : selectedStudent.option
         setSelectedStudentOption(displayOption)
         setSelectedStudentExplanation(selectedStudent.response || 'No explanation provided by this student.')
-        setDisplayedOptionStudentId(selectedStudent.studentId) // Track whose option is displayed
+        setSelectedStudentCustomOption(selectedStudent.customOption || '') // Set custom option from selected student
+        setDisplayedOptionStudentId(selectedStudent.studentId)
         setNoValidOptions(false)
         console.log('Case 2: Multiple students - showing random other option:', displayOption)
       } else {
@@ -240,14 +244,16 @@ function ResearchMethodologyScreen() {
           const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
           setSelectedStudentOption(displayOption)
           setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
-          setDisplayedOptionStudentId(currentStudentId) // Track that current user's option is displayed
+          setSelectedStudentCustomOption(currentUserCustomOption || '') // Set custom option
+          setDisplayedOptionStudentId(currentStudentId)
           setNoValidOptions(false)
           console.log('Case 3: All others invalid - showing current user option:', displayOption)
         } else {
           // Final fallback: No valid options available
           setSelectedStudentOption('No valid options available.')
           setSelectedStudentExplanation('No valid options were selected within the time limit.')
-          setDisplayedOptionStudentId(null) // No valid option to track
+          setSelectedStudentCustomOption('') // Clear custom option
+          setDisplayedOptionStudentId(null)
           setNoValidOptions(true)
           console.log('Final fallback: No valid options from any students')
         }
@@ -260,12 +266,14 @@ function ResearchMethodologyScreen() {
         const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
         setSelectedStudentOption(displayOption)
         setSelectedStudentExplanation(currentUserExplanation || 'Error loading explanation.')
-        setDisplayedOptionStudentId(currentStudentId) // Track current user's option on error
+        setSelectedStudentCustomOption(currentUserCustomOption || '') // Set custom option on error
+        setDisplayedOptionStudentId(currentStudentId)
         setNoValidOptions(false)
       } else {
         setSelectedStudentOption('Error loading option')
         setSelectedStudentExplanation('Error loading explanation.')
-        setDisplayedOptionStudentId(null) // No valid option to track
+        setSelectedStudentCustomOption('') // Clear custom option on error
+        setDisplayedOptionStudentId(null)
         setNoValidOptions(true)
       }
     }
@@ -282,9 +290,7 @@ function ResearchMethodologyScreen() {
         },
         body: JSON.stringify({
           sessionId: sessionId,
-          studentId: displayedOptionStudentId, // The current user reviewing the option
-          // displayedOptionStudentId: displayedOptionStudentId, // The student whose option is being reviewed
-          // displayedOption: selectedStudentOption, // The option being reviewed
+          studentId: displayedOptionStudentId,
           limitExplanation: limitExplanation.trim(),
         }),
       })
@@ -416,6 +422,12 @@ function ResearchMethodologyScreen() {
               {selectedStudentOption === 'Compromise option 2.' && (
                 <Typography variant="body2" sx={{ mt: 1, color: '#666', fontStyle: 'italic' }}>
                   Use computational methods to estimate which cortical regions generated each scalp signal, then measure mutual information between those reconstructed regions.
+                </Typography>
+              )}
+              {/* NEW: Display custom option text when option is "Other" */}
+              {selectedStudentOption === 'Other' && selectedStudentCustomOption && (
+                <Typography variant="body2" sx={{ mt: 1, color: '#666', fontStyle: 'italic' }}>
+                  {selectedStudentCustomOption}
                 </Typography>
               )}
             </Box>
