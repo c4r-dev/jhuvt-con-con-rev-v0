@@ -338,13 +338,112 @@ export async function POST(req) {
 }
 
 // Optional: Add a separate PATCH method specifically for updating limitExplanation
+// export async function PATCH(req) {
+//   try {
+//     await connectMongoDB();
+
+//     const body = await req.json();
+//     const { sessionId, studentId, limitExplanation } = body;
+
+//     // Validate required fields
+//     if (!sessionId || !studentId) {
+//       return NextResponse.json(
+//         { message: 'Missing required fields: sessionId and studentId are required' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Validate limitExplanation
+//     if (limitExplanation === undefined) {
+//       return NextResponse.json(
+//         { message: 'limitExplanation is required for this operation' },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (typeof limitExplanation !== 'string') {
+//       return NextResponse.json(
+//         { message: 'limitExplanation must be a string value' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Find existing session
+//     const session = await Session.findOne({ sessionId });
+
+//     if (!session) {
+//       return NextResponse.json(
+//         { message: 'Session not found' },
+//         { status: 404 }
+//       );
+//     }
+
+//     // Find the student in the session
+//     const studentIndex = session.students.findIndex(
+//       student => student.studentId === studentId
+//     );
+
+//     if (studentIndex === -1) {
+//       return NextResponse.json(
+//         { message: 'Student not found in session' },
+//         { status: 404 }
+//       );
+//     }
+
+//     // Update the limitExplanation
+//     session.students[studentIndex].limitExplanation = limitExplanation.trim() || null;
+//     session.students[studentIndex].timestamp = new Date();
+
+//     // Mark the students array as modified for Mongoose
+//     session.markModified('students');
+
+//     // Save the session
+//     await session.save();
+
+//     const updatedStudent = session.students[studentIndex];
+
+//     return NextResponse.json(
+//       {
+//         message: 'Limit explanation updated successfully',
+//         data: {
+//           sessionId,
+//           studentId,
+//           student: {
+//             studentId: updatedStudent.studentId,
+//             option: updatedStudent.option,
+//             response: updatedStudent.response,
+//             withinTimer: updatedStudent.withinTimer,
+//             limitExplanation: updatedStudent.limitExplanation,
+//             customOption: updatedStudent.customOption,
+//             timestamp: updatedStudent.timestamp
+//           },
+//           updatedAt: new Date().toISOString()
+//         }
+//       },
+//       { status: 200 }
+//     );
+
+//   } catch (error) {
+//     console.error('Error updating limit explanation:', error);
+
+//     return NextResponse.json(
+//       { message: 'Internal Server Error', error: error.message },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+// PATCH API with extensive debugging
 export async function PATCH(req) {
   try {
     await connectMongoDB();
-
+    
     const body = await req.json();
     const { sessionId, studentId, limitExplanation } = body;
-
+    
+    console.log('=== PATCH API DEBUG START ===');
+    console.log('Request body:', body);
+    
     // Validate required fields
     if (!sessionId || !studentId) {
       return NextResponse.json(
@@ -352,68 +451,133 @@ export async function PATCH(req) {
         { status: 400 }
       );
     }
-
-    // Validate limitExplanation
+    
     if (limitExplanation === undefined) {
       return NextResponse.json(
         { message: 'limitExplanation is required for this operation' },
         { status: 400 }
       );
     }
-
+    
     if (typeof limitExplanation !== 'string') {
       return NextResponse.json(
         { message: 'limitExplanation must be a string value' },
         { status: 400 }
       );
     }
-
+    
     // Find existing session
     const session = await Session.findOne({ sessionId });
-
+    
     if (!session) {
       return NextResponse.json(
         { message: 'Session not found' },
         { status: 404 }
       );
     }
-
+    
+    console.log('Found session:', session.sessionId);
+    
     // Find the student in the session
     const studentIndex = session.students.findIndex(
       student => student.studentId === studentId
     );
-
+    
     if (studentIndex === -1) {
       return NextResponse.json(
         { message: 'Student not found in session' },
         { status: 404 }
       );
     }
-
-    // Update the limitExplanation
-    session.students[studentIndex].limitExplanation = limitExplanation.trim() || null;
-    session.students[studentIndex].timestamp = new Date();
-
+    
+    const student = session.students[studentIndex];
+    console.log('BEFORE UPDATE - Student object:', JSON.stringify(student, null, 2));
+    
+    const trimmedExplanation = limitExplanation.trim() || null;
+    
+    // Initialize limitExplanations object if it doesn't exist
+    if (!student.limitExplanations) {
+      student.limitExplanations = {};
+      console.log('Initialized empty limitExplanations object');
+    }
+    
+    console.log('Current limitExplanations:', student.limitExplanations);
+    
+    // Determine which field to update based on what already exists
+    let fieldToUpdate;
+    let explanationNumber = null;
+    
+    // Check if limitExplanation is empty, null, undefined, or just whitespace
+    const hasLimitExplanation = student.limitExplanation && 
+                               student.limitExplanation.toString().trim() !== '';
+    
+    console.log('hasLimitExplanation:', hasLimitExplanation);
+    
+    if (!hasLimitExplanation) {
+      // No valid limitExplanation exists, use the original field
+      fieldToUpdate = 'limitExplanation';
+      console.log('Will update main limitExplanation field');
+    } else {
+      // limitExplanation exists and has content, find the next available numbered slot
+      let counter = 1;
+      while (student.limitExplanations[`limitExplanation${counter}`] && 
+             student.limitExplanations[`limitExplanation${counter}`].toString().trim() !== '') {
+        console.log(`limitExplanation${counter} exists:`, student.limitExplanations[`limitExplanation${counter}`]);
+        counter++;
+      }
+      fieldToUpdate = `limitExplanation${counter}`;
+      explanationNumber = counter;
+      console.log(`Will update numbered field: ${fieldToUpdate}`);
+    }
+    
+    // Update the appropriate field
+    if (fieldToUpdate === 'limitExplanation') {
+      student.limitExplanation = trimmedExplanation;
+      console.log('Updated main limitExplanation to:', trimmedExplanation);
+    } else {
+      student.limitExplanations[fieldToUpdate] = trimmedExplanation;
+      console.log(`Updated ${fieldToUpdate} to:`, trimmedExplanation);
+      // Mark limitExplanations as modified for Schema.Types.Mixed
+      session.students[studentIndex].markModified('limitExplanations');
+      console.log('Marked limitExplanations as modified');
+    }
+    
+    // Update timestamp
+    student.timestamp = new Date();
+    
     // Mark the students array as modified for Mongoose
     session.markModified('students');
-
+    console.log('Marked students array as modified');
+    
+    console.log('AFTER UPDATE - Student object:', JSON.stringify(student, null, 2));
+    
     // Save the session
-    await session.save();
-
+    const savedSession = await session.save();
+    console.log('Session saved successfully');
+    
+    // Verify the save by finding the student again
+    const verifyStudent = savedSession.students.find(s => s.studentId === studentId);
+    console.log('VERIFICATION - Student after save:', JSON.stringify(verifyStudent, null, 2));
+    
     const updatedStudent = session.students[studentIndex];
-
+    
+    console.log('=== PATCH API DEBUG END ===');
+    
     return NextResponse.json(
       {
-        message: 'Limit explanation updated successfully',
+        message: `Limit explanation updated successfully in field: ${fieldToUpdate}`,
         data: {
           sessionId,
           studentId,
+          fieldUpdated: fieldToUpdate,
+          explanationNumber: explanationNumber,
           student: {
             studentId: updatedStudent.studentId,
             option: updatedStudent.option,
             response: updatedStudent.response,
             withinTimer: updatedStudent.withinTimer,
             limitExplanation: updatedStudent.limitExplanation,
+            limitExplanations: updatedStudent.limitExplanations,
             customOption: updatedStudent.customOption,
             timestamp: updatedStudent.timestamp
           },
@@ -422,10 +586,10 @@ export async function PATCH(req) {
       },
       { status: 200 }
     );
-
+    
   } catch (error) {
     console.error('Error updating limit explanation:', error);
-
+    
     return NextResponse.json(
       { message: 'Internal Server Error', error: error.message },
       { status: 500 }
@@ -433,96 +597,89 @@ export async function PATCH(req) {
   }
 }
 
+
+
 export async function GET(req) {
-  try {
-    await connectMongoDB();
-
-    const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('sessionId');
-    const studentId = searchParams.get('studentId');
-
-    // Validate required sessionId
-    if (!sessionId) {
-      return NextResponse.json(
-        { message: 'Missing required parameter: sessionId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Find the session
-    const session = await Session.findOne({ sessionId });
-
-    if (!session) {
-      return NextResponse.json(
-        { message: `Session with sessionId '${sessionId}' not found` },
-        { status: 404 }
-      );
-    }
-
-    // If studentId is provided, return only that student's data
-    if (studentId) {
-      const student = session.students.find(s => s.studentId === studentId);
-      
-      if (!student) {
+    try {
+      await connectMongoDB();
+  
+      const { searchParams } = new URL(req.url);
+      const sessionId = searchParams.get('sessionId'); // Get from query parameter
+      const studentId = searchParams.get('studentId');
+  
+      console.log('=== GET API DEBUG START ===');
+      console.log('Full URL:', req.url);
+      console.log('SessionId from query:', sessionId);
+      console.log('StudentId query param:', studentId);
+      console.log('All search params:', Object.fromEntries(searchParams.entries()));
+  
+      if (!sessionId) {
         return NextResponse.json(
-          { message: `Student with studentId '${studentId}' not found in session '${sessionId}'` },
+          { message: 'sessionId query parameter is required' },
+          { status: 400 }
+        );
+      }
+  
+      const session = await Session.findOne({ sessionId });
+  
+      if (!session) {
+        return NextResponse.json(
+          { message: `Session '${sessionId}' not found` },
           { status: 404 }
         );
       }
-
-      return NextResponse.json(
-        {
+  
+      console.log('Found session with students count:', session.students.length);
+  
+      // If studentId query param is provided
+      if (studentId) {
+        const student = session.students.find(s => s.studentId === studentId);
+        
+        if (!student) {
+          return NextResponse.json(
+            { message: `Student '${studentId}' not found in session` },
+            { status: 404 }
+          );
+        }
+  
+        console.log('RETRIEVED STUDENT OBJECT:', JSON.stringify(student, null, 2));
+        console.log('Student limitExplanation:', student.limitExplanation);
+        console.log('Student limitExplanations:', student.limitExplanations);
+        console.log('=== GET API DEBUG END ===');
+  
+        return NextResponse.json({
           message: 'Student data retrieved successfully',
           data: {
             sessionId: session.sessionId,
             sessionType: session.sessionType,
-            student: {
-              studentId: student.studentId,
-              option: student.option,
-              response: student.response,
-              withinTimer: student.withinTimer,
-              limitExplanation: student.limitExplanation,
-              customOption: student.customOption,
-              timestamp: student.timestamp
-            },
-            sessionCreatedAt: session.createdAt,
-            sessionUpdatedAt: session.updatedAt
+            student,
+            sessionStats: {
+              totalStudents: session.students.length,
+              createdAt: session.createdAt,
+              updatedAt: session.updatedAt
+            }
           }
-        },
-        { status: 200 }
-      );
-    }
-
-    // Return full session data with all students
-    return NextResponse.json(
-      {
-        message: 'Session data retrieved successfully',
+        });
+      }
+  
+      // Return full session if no specific student requested
+      return NextResponse.json({
+        message: 'Session retrieved successfully',
         data: {
           sessionId: session.sessionId,
           sessionType: session.sessionType,
           totalStudents: session.students.length,
-          students: session.students.map(student => ({
-            studentId: student.studentId,
-            option: student.option,
-            response: student.response,
-            withinTimer: student.withinTimer,
-            limitExplanation: student.limitExplanation,
-            customOption: student.customOption,
-            timestamp: student.timestamp
-          })),
+          students: session.students,
           createdAt: session.createdAt,
           updatedAt: session.updatedAt
         }
-      },
-      { status: 200 }
-    );
-
-  } catch (error) {
-    console.error('Error retrieving session data:', error);
-
-    return NextResponse.json(
-      { message: 'Internal Server Error', error: error.message },
-      { status: 500 }
-    );
-  }
+      });
+  
+    } catch (error) {
+      console.error('Error retrieving session:', error);
+      return NextResponse.json(
+        { message: 'Internal Server Error', error: error.message },
+        { status: 500 }
+      );
+    }
 }

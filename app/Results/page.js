@@ -58,21 +58,7 @@ function StrategyScreen() {
     { name: 'Estimate\nRegions', value: 0 },
     { name: 'Other', value: 0 },
   ])
-  const [explanations, setExplanations] = useState({
-    explanation1: '',
-    explanation2: '',
-    explanation3: '',
-  })
-  const [limits, setLimits] = useState({
-    limit1: '',
-    limit2: '',
-    limit3: '',
-  })
-  const [customOptions, setCustomOptions] = useState({
-    customOption1: '',
-    customOption2: '',
-    customOption3: ''
-  })
+  const [tableRows, setTableRows] = useState([])
 
   // Tab options mapping - maps tab index to actual option values in the data
   const tabOptions = [
@@ -84,6 +70,37 @@ function StrategyScreen() {
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue)
+  }
+
+  // Helper function to extract all limit explanation fields from a student
+  const extractLimitExplanations = (student) => {
+    const limitExplanations = []
+    
+    // Add the main limitExplanation if it exists
+    if (student.limitExplanation && student.limitExplanation.trim()) {
+      limitExplanations.push(student.limitExplanation)
+    }
+    
+    // Add numbered limit explanations from limitExplanations object
+    if (student.limitExplanations && typeof student.limitExplanations === 'object') {
+      // Sort the keys to maintain order (limitExplanation1, limitExplanation2, etc.)
+      const sortedKeys = Object.keys(student.limitExplanations)
+        .filter(key => key.startsWith('limitExplanation'))
+        .sort((a, b) => {
+          const numA = parseInt(a.replace('limitExplanation', '')) || 0
+          const numB = parseInt(b.replace('limitExplanation', '')) || 0
+          return numA - numB
+        })
+      
+      sortedKeys.forEach(key => {
+        const value = student.limitExplanations[key]
+        if (value && value.toString().trim()) {
+          limitExplanations.push(value.toString())
+        }
+      })
+    }
+    
+    return limitExplanations
   }
 
   // Fetch session data on component mount
@@ -185,64 +202,50 @@ function StrategyScreen() {
   const filterDataByTab = () => {
     if (!sessionData.length) {
       console.log('No session data available for filtering')
+      setTableRows([])
       return
     }
 
     const selectedOption = tabOptions[selectedTab]
     console.log('Filtering by option:', selectedOption)
-    console.log('Available data:', sessionData)
 
     // Filter data based on selected tab option
     const filtered = sessionData.filter((student) => {
-      console.log(
-        'Student option:',
-        student.option,
-        'Match:',
-        student.option === selectedOption,
-      )
       return student.option === selectedOption
     })
 
     console.log('Filtered data:', filtered)
     setFilteredData(filtered)
 
-    // Update explanations, limits, and customOptions based on filtered data
-    const newExplanations = {}
-    const newLimits = {}
-    const newCustomOptions = {}
-
-    // Reset all fields first
-    for (let i = 1; i <= 3; i++) {
-      newExplanations[`explanation${i}`] = ''
-      newLimits[`limit${i}`] = ''
-      newCustomOptions[`customOption${i}`] = ''
-    }
-
-    // Populate with filtered data
-    filtered.forEach((student, index) => {
-      if (index < 3) {
-        // Only show first 3 entries
-        newExplanations[`explanation${index + 1}`] = student.response || ''
-        newLimits[`limit${index + 1}`] = student.limitExplanation || ''
-        newCustomOptions[`customOption${index + 1}`] = student.customOption || ''
-
-        console.log(`Entry ${index + 1}:`, {
-          studentId: student.studentId,
-          option: student.option,
-          response: student.response,
-          limitExplanation: student.limitExplanation,
-          customOption: student.customOption
+    // Create table rows with expanded limit explanations
+    const rows = []
+    
+    filtered.forEach((student) => {
+      const limitExplanations = extractLimitExplanations(student)
+      
+      if (limitExplanations.length === 0) {
+        // If no limit explanations, create a single row
+        rows.push({
+          explanation: student.response || '',
+          limitExplanation: '',
+          customOption: student.customOption || '',
+          studentId: student.studentId
+        })
+      } else {
+        // Create a row for each limit explanation
+        limitExplanations.forEach((limitExp) => {
+          rows.push({
+            explanation: student.response || '',
+            limitExplanation: limitExp,
+            customOption: student.customOption || '',
+            studentId: student.studentId
+          })
         })
       }
     })
 
-    setExplanations(newExplanations)
-    setLimits(newLimits)
-    setCustomOptions(newCustomOptions)
-
-    console.log('Updated explanations:', newExplanations)
-    console.log('Updated limits:', newLimits)
-    console.log('Updated customOptions:', newCustomOptions)
+    setTableRows(rows)
+    console.log('Generated table rows:', rows)
   }
 
   // Debug: Show current state
@@ -250,9 +253,7 @@ function StrategyScreen() {
     selectedTab,
     sessionDataLength: sessionData.length,
     filteredDataLength: filteredData.length,
-    explanations,
-    limits,
-    customOptions
+    tableRowsLength: tableRows.length
   })
 
   return (
@@ -539,7 +540,7 @@ function StrategyScreen() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredData.length === 0 ? (
+              {tableRows.length === 0 ? (
                 // Show "no information" when no data
                 <TableRow
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -562,10 +563,10 @@ function StrategyScreen() {
                   </TableCell>
                 </TableRow>
               ) : (
-                // Show data when available
-                [1, 2, 3].map((num) => (
+                // Show data when available - now using dynamic tableRows
+                tableRows.map((row, index) => (
                   <TableRow
-                    key={num}
+                    key={`${row.studentId}-${index}`}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell
@@ -581,7 +582,7 @@ function StrategyScreen() {
                         variant="body2"
                         sx={{ whiteSpace: 'pre-wrap' }}
                       >
-                        {explanations[`explanation${num}`] || ''}
+                        {row.explanation}
                       </Typography>
                     </TableCell>
                     {/* Show LIMIT column when not on SET ASIDE tab (tab index 0) */}
@@ -599,7 +600,7 @@ function StrategyScreen() {
                           variant="body2"
                           sx={{ whiteSpace: 'pre-wrap' }}
                         >
-                          {limits[`limit${num}`] || ''}
+                          {row.limitExplanation}
                         </Typography>
                       </TableCell>
                     )}
@@ -618,7 +619,7 @@ function StrategyScreen() {
                           variant="body2"
                           sx={{ whiteSpace: 'pre-wrap' }}
                         >
-                          {customOptions[`customOption${num}`] || ''}
+                          {row.customOption}
                         </Typography>
                       </TableCell>
                     )}

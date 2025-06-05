@@ -99,7 +99,8 @@ function ResearchMethodologyScreen() {
   const [currentStudentId, setCurrentStudentId] = useState(null)
   const [currentUserOption, setCurrentUserOption] = useState('')
   const [currentUserCustomOption, setCurrentUserCustomOption] = useState('')
-  const [noValidOptions, setNoValidOptions] = useState(false) // New state to track if no valid options
+  const [noValidOptions, setNoValidOptions] = useState(false)
+  const [displayedOptionStudentId, setDisplayedOptionStudentId] = useState(null) // NEW: Track whose option is displayed
 
   useEffect(() => {
     const sessionIdFromUrl = searchParams.get('sessionID')
@@ -201,11 +202,13 @@ function ResearchMethodologyScreen() {
           const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
           setSelectedStudentOption(displayOption)
           setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
+          setDisplayedOptionStudentId(currentStudentId) // Track that current user's option is displayed
           setNoValidOptions(false)
           console.log('Case 1: Only student - showing own option:', displayOption)
         } else {
           setSelectedStudentOption('No valid options available.')
           setSelectedStudentExplanation('No valid options were selected within the time limit.')
+          setDisplayedOptionStudentId(null) // No valid option to track
           setNoValidOptions(true)
           console.log('Case 1: Only student chose to set experiment aside or outside time limit')
         }
@@ -227,6 +230,7 @@ function ResearchMethodologyScreen() {
         const displayOption = selectedStudent.option === 'Other.' ? 'Other' : selectedStudent.option
         setSelectedStudentOption(displayOption)
         setSelectedStudentExplanation(selectedStudent.response || 'No explanation provided by this student.')
+        setDisplayedOptionStudentId(selectedStudent.studentId) // Track whose option is displayed
         setNoValidOptions(false)
         console.log('Case 2: Multiple students - showing random other option:', displayOption)
       } else {
@@ -236,12 +240,14 @@ function ResearchMethodologyScreen() {
           const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
           setSelectedStudentOption(displayOption)
           setSelectedStudentExplanation(currentUserExplanation || 'Your explanation for this choice.')
+          setDisplayedOptionStudentId(currentStudentId) // Track that current user's option is displayed
           setNoValidOptions(false)
           console.log('Case 3: All others invalid - showing current user option:', displayOption)
         } else {
           // Final fallback: No valid options available
           setSelectedStudentOption('No valid options available.')
           setSelectedStudentExplanation('No valid options were selected within the time limit.')
+          setDisplayedOptionStudentId(null) // No valid option to track
           setNoValidOptions(true)
           console.log('Final fallback: No valid options from any students')
         }
@@ -254,10 +260,12 @@ function ResearchMethodologyScreen() {
         const displayOption = currentUserOption === 'Other.' ? 'Other' : currentUserOption
         setSelectedStudentOption(displayOption)
         setSelectedStudentExplanation(currentUserExplanation || 'Error loading explanation.')
+        setDisplayedOptionStudentId(currentStudentId) // Track current user's option on error
         setNoValidOptions(false)
       } else {
         setSelectedStudentOption('Error loading option')
         setSelectedStudentExplanation('Error loading explanation.')
+        setDisplayedOptionStudentId(null) // No valid option to track
         setNoValidOptions(true)
       }
     }
@@ -274,7 +282,9 @@ function ResearchMethodologyScreen() {
         },
         body: JSON.stringify({
           sessionId: sessionId,
-          studentId: currentStudentId,
+          studentId: displayedOptionStudentId, // The current user reviewing the option
+          // displayedOptionStudentId: displayedOptionStudentId, // The student whose option is being reviewed
+          // displayedOption: selectedStudentOption, // The option being reviewed
           limitExplanation: limitExplanation.trim(),
         }),
       })

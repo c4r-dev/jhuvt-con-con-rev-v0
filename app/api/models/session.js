@@ -24,6 +24,11 @@ const studentSchema = new Schema(
       type: String,
       required: false
     },
+    // Object that can contain any number of dynamic fields like limitExplanation1, limitExplanation2, etc.
+    limitExplanations: {
+      type: Schema.Types.Mixed,
+      default: {}
+    },
     customOption: {
       type: String,
       required: false // Only populated when option is "Other."
