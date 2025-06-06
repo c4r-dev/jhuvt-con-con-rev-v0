@@ -84,6 +84,7 @@ function AddressControlConstraint() {
   const [displayTime, setDisplayTime] = useState('--:--')
   const [timeExpired, setTimeExpired] = useState(false)
   const [isTimerConfirmedStarted, setIsTimerConfirmedStarted] = useState(false)
+  const [hideTimer, setHideTimer] = useState(false) // New state for hiding timer
 
   // --- Timer Polling and Calculation ---
   // Function to fetch timer status
@@ -193,9 +194,19 @@ function AddressControlConstraint() {
         if (remainingSeconds > 0) {
           setDisplayTime(formatTime(remainingSeconds))
           setTimeExpired(false)
+          setHideTimer(false) // Reset hide timer when time is still remaining
         } else {
           setDisplayTime(formatTime(0)) // Show 00:00 when expired
-          setTimeExpired(true)
+          if (!timeExpired) {
+            // Only set timeExpired once and start the 3-second hide timer
+            setTimeExpired(true)
+            
+            // Hide the timer after 3 seconds
+            setTimeout(() => {
+              setHideTimer(true)
+            }, 3000)
+          }
+          
           if (countdownIntervalRef.current) {
             clearInterval(countdownIntervalRef.current) // Stop interval once expired
           }
@@ -208,6 +219,7 @@ function AddressControlConstraint() {
       // Timer hasn't started
       setDisplayTime('--:--')
       setTimeExpired(false)
+      setHideTimer(false)
     }
 
     // Cleanup interval on component unmount or timerInfo change
@@ -216,7 +228,7 @@ function AddressControlConstraint() {
         clearInterval(countdownIntervalRef.current)
       }
     }
-  }, [timerInfo])
+  }, [timerInfo, timeExpired]) // Add timeExpired to dependencies
 
   // --- End Timer Logic ---
 
@@ -860,8 +872,8 @@ Depth electrodes require a much more invasive procedure, which will limit your a
       )}
 
       <div className="header-container">
-        {/* Timer Display - Show when timer is active */}
-        {timerInfo.startTime && (
+        {/* Timer Display - Show when timer is active and not hidden */}
+        {timerInfo.startTime && !hideTimer && (
           <Paper
             elevation={0}
             sx={{
