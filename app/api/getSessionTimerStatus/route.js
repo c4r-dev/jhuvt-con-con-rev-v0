@@ -15,7 +15,7 @@ export async function GET(request) {
     }
 
     // Optional: Add log to see when the function actually runs vs. serving cache
-    console.log(`[API Timer Status] Executing GET for ${sessionID}`); 
+    console.log(`[API Timer Status] Executing GET for ${sessionID}`);
 
     await connectMongoDB();
 
@@ -47,4 +47,54 @@ export async function GET(request) {
     console.error("Error fetching session timer status:", error);
     return NextResponse.json({ message: "Error fetching session timer status.", error: error.message }, { status: 500 });
   }
-} 
+}
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionID = searchParams.get('sessionID');
+
+    if (!sessionID) {
+      return NextResponse.json({ message: "Missing sessionID parameter." }, { status: 400 });
+    }
+
+    console.log(`[API Timer Delete] Resetting timer for ${sessionID}`);
+
+    await connectMongoDB();
+
+    // Find the session and reset the timer start time to null
+    const updatedSession = await Timer.findOneAndUpdate(
+      { sessionID },
+      { 
+        $unset: { timerStartTime: "" } // This removes the field entirely
+        // Alternatively, you can use: $set: { timerStartTime: null }
+      },
+      { 
+        new: true, // Return the updated document
+        upsert: false // Don't create if it doesn't exist
+      }
+    ).exec();
+
+    if (!updatedSession) {
+      return NextResponse.json({ message: "Session not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: "Timer reset successfully.",
+      sessionID: sessionID,
+      isActive: false,
+      startTime: null,
+      durationSeconds: updatedSession.timerDurationSeconds || 90
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Error resetting session timer:", error);
+    return NextResponse.json({ message: "Error resetting session timer.", error: error.message }, { status: 500 });
+  }
+}
+
+//to delete a session:
+// run these 2 api's: 
+// 1 -> http://localhost:3001/api/controls?sessionID={sessionId}&confirm=true
+//2 ->  http://localhost:3001/api/getSessionTimerStatus?sessionID={sessionID}&confirm=true
+

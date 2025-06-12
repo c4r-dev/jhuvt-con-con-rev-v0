@@ -683,3 +683,123 @@ export async function GET(req) {
       );
     }
 }
+
+
+export async function DELETE(req) {
+  try {
+    await connectMongoDB();
+
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get('sessionID'); // Get specific session to delete
+    const confirmDelete = searchParams.get('confirm'); // Safety parameter
+
+    console.log('=== DELETE SESSIONS API DEBUG START ===');
+    console.log('Full URL:', req.url);
+    console.log('SessionId from query:', sessionId);
+    console.log('Confirm parameter:', confirmDelete);
+    console.log('All search params:', Object.fromEntries(searchParams.entries()));
+
+    // Safety check - require confirmation parameter
+    if (confirmDelete !== 'true') {
+      const warningMessage = sessionId 
+        ? `Confirmation required. Add ?confirm=true to delete session '${sessionId}'.`
+        : 'Confirmation required. Add ?confirm=true to delete all sessions.';
+      
+      const warningText = sessionId
+        ? `This action will permanently delete session '${sessionId}' and all its student data.`
+        : 'This action will permanently delete ALL session data and cannot be undone.';
+
+      return NextResponse.json(
+        { 
+          message: warningMessage,
+          warning: warningText
+        },
+        { status: 400 }
+      );
+    }
+
+    // If sessionId is provided, delete specific session
+    if (sessionId) {
+      console.log('Deleting specific session:', sessionId);
+      
+      // Check if session exists first
+      const sessionToDelete = await Session.findOne({ sessionId });
+      
+      if (!sessionToDelete) {
+        return NextResponse.json(
+          { message: `Session '${sessionId}' not found` },
+          { status: 404 }
+        );
+      }
+
+      const studentCount = sessionToDelete.students ? sessionToDelete.students.length : 0;
+      console.log('Students in session to be deleted:', studentCount);
+
+      // Delete the specific session
+      const deleteResult = await Session.deleteOne({ sessionId });
+      
+      console.log('Delete operation result:', deleteResult);
+      console.log('=== DELETE SESSIONS API DEBUG END ===');
+
+      return NextResponse.json({
+        message: `Session '${sessionId}' deleted successfully`,
+        data: {
+          sessionId: sessionId,
+          deletedCount: deleteResult.deletedCount,
+          totalStudentsDeleted: studentCount,
+          operationTimestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    // If no sessionId provided, delete all sessions
+    console.log('Deleting all sessions');
+
+    // Get count before deletion for reporting
+    const sessionCountBefore = await Session.countDocuments();
+    console.log('Sessions to be deleted:', sessionCountBefore);
+
+    if (sessionCountBefore === 0) {
+      return NextResponse.json({
+        message: 'No sessions found to delete',
+        data: {
+          deletedCount: 0,
+          totalStudentsDeleted: 0
+        }
+      });
+    }
+
+    // Calculate total students before deletion
+    const allSessions = await Session.find({}, { students: 1 });
+    const totalStudentsCount = allSessions.reduce((total, session) => {
+      return total + (session.students ? session.students.length : 0);
+    }, 0);
+
+    console.log('Total students to be deleted:', totalStudentsCount);
+
+    // Delete all sessions
+    const deleteResult = await Session.deleteMany({});
+
+    console.log('Delete operation result:', deleteResult);
+    console.log('=== DELETE SESSIONS API DEBUG END ===');
+
+    return NextResponse.json({
+      message: 'All sessions deleted successfully',
+      data: {
+        deletedCount: deleteResult.deletedCount,
+        totalStudentsDeleted: totalStudentsCount,
+        operationTimestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('Error deleting sessions:', error);
+    return NextResponse.json(
+      { 
+        message: 'Internal Server Error', 
+        error: error.message 
+      },
+      { status: 500 }
+    );
+  }
+}
