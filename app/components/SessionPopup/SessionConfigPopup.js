@@ -252,13 +252,13 @@ const SessionConfigPopup = ({
     setQrCodeUrl(qrUrl);
   };
 
-  // Check for sessionID in URL on mount
+ // Check for sessionID in URL on mount
   useEffect(() => {
     const urlSessionID = searchParams.get('sessionID');
     if (!urlSessionID) {
       onClose?.();
     }
-  }, [searchParams]);
+  }, [searchParams, onClose]);
 
   const handleClose = (event, reason) => {
     // Prevent closing when clicking outside
