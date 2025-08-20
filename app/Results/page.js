@@ -267,14 +267,14 @@ function StrategyScreen() {
     <Container maxWidth="lg" sx={{ py: 3 }}>
       {/* Loading indicator */}
       {loading && (
-        <Alert severity="info" sx={{ mb: 3 }}>
+        <Alert severity="info" sx={{ mb: 3, border: '1px solid black !important', boxShadow: 'none !important' }}>
           Loading session data...
         </Alert>
       )}
 
       {/* Error message if no data */}
       {!loading && sessionData.length === 0 && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
+        <Alert severity="warning" sx={{ mb: 3, border: '1px solid black !important', boxShadow: 'none !important' }}>
           No data found for this session. Please check the sessionID in the URL.
         </Alert>
       )}
@@ -286,6 +286,8 @@ function StrategyScreen() {
           mb: 3,
           backgroundColor: '#FFE4B5',
           color: '#8B4513',
+          border: '1px solid black !important',
+          boxShadow: 'none !important',
           '& .MuiAlert-icon': {
             color: '#FF6B35',
           },
@@ -301,13 +303,13 @@ function StrategyScreen() {
       </Alert>
 
       {/* Chart Section */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3, backgroundColor: '#f5f5f5' }}>
+      <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: '#f5f5f5', border: '1px solid black !important', boxShadow: 'none !important' }}>
         <Box
           sx={{
             height: 300,
             mb: 2,
             position: 'relative',
-            border: '1px solid #ddd',
+            border: 'none',
             ml: 4,
           }}
         >
@@ -363,8 +365,7 @@ function StrategyScreen() {
               top: '10px',
               right: '10px',
               bottom: '50px',
-              borderLeft: '1px solid #ddd',
-              borderBottom: '1px solid #ddd',
+              border: 'none',
               background: `
           linear-gradient(to top, 
             transparent 0%, 
@@ -476,21 +477,25 @@ function StrategyScreen() {
       </Paper>
 
       {/* Tabs Section */}
-      <Paper elevation={0} sx={{ mb: 3 }}>
+      <Paper elevation={0} sx={{ mb: 3, border: 'none', boxShadow: 'none !important' }}>
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
           centered
           sx={{
+            border: 'none',
             '& .MuiTab-root': {
               backgroundColor: '#ccc',
               color: '#666',
               textTransform: 'uppercase',
               fontWeight: 'bold',
               minHeight: 48,
+              border: '2px solid white',
+              margin: '2px',
               '&.Mui-selected': {
                 color: 'white',
                 backgroundColor: '#333',
+                border: '2px solid white',
               },
             },
             '& .MuiTabs-indicator': {
@@ -506,16 +511,17 @@ function StrategyScreen() {
       </Paper>
 
       {/* Table Section */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3, backgroundColor: '#e8e8e8' }}>
-        <TableContainer component={Paper} sx={{ backgroundColor: '#f5f5f5' }}>
-          <Table sx={{ minWidth: 650 }}>
+      <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: '#e8e8e8', border: '1px solid black !important', boxShadow: 'none !important' }}>
+        <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: '#f5f5f5', border: '1px solid black !important', boxShadow: 'none !important' }}>
+          <Table sx={{ minWidth: 650, border: 'none', '& td, & th': { border: 'none !important' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#d0d0d0' }}>
+              <TableRow sx={{ backgroundColor: '#d0d0d0', border: 'none' }}>
                 <TableCell
                   sx={{
                     fontWeight: 'bold',
                     color: '#666',
                     fontSize: '0.875rem',
+                    border: 'none',
                   }}
                 >
                   EXPLANATION
@@ -527,9 +533,10 @@ function StrategyScreen() {
                       fontWeight: 'bold',
                       color: '#666',
                       fontSize: '0.875rem',
+                      border: 'none',
                     }}
                   >
-                    LIMIT.
+                    LIMIT
                   </TableCell>
                 )}
                 {/* Show ALTERNATIVE column only on OTHER tab (tab index 3) */}
@@ -539,6 +546,7 @@ function StrategyScreen() {
                       fontWeight: 'bold',
                       color: '#666',
                       fontSize: '0.875rem',
+                      border: 'none',
                     }}
                   >
                     ALTERNATIVE
@@ -550,7 +558,7 @@ function StrategyScreen() {
               {tableRows.length === 0 ? (
                 // Show "no information" when no data
                 <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  sx={{ border: 'none', '& td, & th': { border: 'none !important' }, '&:last-child td, &:last-child th': { border: 'none !important' } }}
                 >
                   <TableCell
                     colSpan={selectedTab === 0 ? 1 : selectedTab === 3 ? 3 : 2}
@@ -559,6 +567,7 @@ function StrategyScreen() {
                       padding: 2,
                       textAlign: 'center',
                       height: '100px',
+                      border: 'none !important',
                     }}
                   >
                     <Typography
@@ -574,7 +583,7 @@ function StrategyScreen() {
                 tableRows.map((row, index) => (
                   <TableRow
                     key={`${row.studentId}-${index}`}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    sx={{ border: 'none', '& td, & th': { border: 'none !important' }, '&:last-child td, &:last-child th': { border: 'none !important' } }}
                   >
                     <TableCell
                       sx={{
@@ -583,6 +592,7 @@ function StrategyScreen() {
                         verticalAlign: 'top',
                         maxWidth: selectedTab === 0 ? '600px' : selectedTab === 3 ? '250px' : '300px',
                         wordWrap: 'break-word',
+                        border: 'none !important',
                       }}
                     >
                       <Typography
@@ -601,6 +611,7 @@ function StrategyScreen() {
                           verticalAlign: 'top',
                           maxWidth: selectedTab === 3 ? '250px' : '300px',
                           wordWrap: 'break-word',
+                          border: 'none !important',
                         }}
                       >
                         <Typography
@@ -620,6 +631,7 @@ function StrategyScreen() {
                           verticalAlign: 'top',
                           maxWidth: '250px',
                           wordWrap: 'break-word',
+                          border: 'none !important',
                         }}
                       >
                         <Typography

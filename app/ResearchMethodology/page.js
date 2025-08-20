@@ -143,6 +143,32 @@ function ResearchMethodologyScreen() {
     }
   }, [searchParams])
 
+  // Auto-scroll to bottom when accordion sections expand
+  useEffect(() => {
+    if (experimentExpanded) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [experimentExpanded])
+
+  useEffect(() => {
+    if (controlsExpanded) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [controlsExpanded])
+
+  // Auto-scroll when student data loads
+  useEffect(() => {
+    if (selectedStudentOption && selectedStudentOption !== 'Loading...') {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 300) // Slightly longer delay for data loading
+    }
+  }, [selectedStudentOption])
+
   const fetchStudentOptions = async (
     sessionId,
     currentStudentId,

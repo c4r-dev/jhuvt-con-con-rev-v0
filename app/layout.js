@@ -65,6 +65,10 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
+      <head>
+        <title>Control Review</title>
+        <link rel="icon" href="/01_RR_Large.png" type="image/png" />
+      </head>
       <body style={{ margin: 0, padding: 0 }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />

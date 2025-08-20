@@ -30,21 +30,18 @@
   
   
     .logo {
-      /* width: 100px; */
-      /* height: 100%; */
-      /* width: 3vh; */
-      /* aspect-ratio: 1/1; */
-      /* width: 100%; */
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      display: block;
       cursor: pointer; /* indicates clickable */
-      height: 36px;
-      width: 36px;
     }
   
   
     .header-title{
       /* color: #FFFFFF; */
       color: #000000;
-      font-size: 1.5rem;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
       font-weight: 700;
     }
   
