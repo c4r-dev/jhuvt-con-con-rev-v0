@@ -89,7 +89,7 @@ function AddressControlConstraint() {
   // --- Timer Polling and Calculation ---
   // Function to fetch timer status
   const fetchTimerStatus = useCallback(async () => {
-    if (!sessionId) return
+    if (!sessionId || sessionId === 'individual1') return
     try {
       const response = await fetch(
         `/api/getSessionTimerStatus?sessionID=${sessionId}`,
@@ -126,8 +126,8 @@ function AddressControlConstraint() {
 
   // Function to start/restart polling interval
   const startPolling = useCallback(() => {
-    // Prevent starting if no sessionID or polling already active
-    if (!sessionId || pollIntervalRef.current) return
+    // Prevent starting if no sessionID, individual mode, or polling already active
+    if (!sessionId || sessionId === 'individual1' || pollIntervalRef.current) return
 
     console.log('[Polling] Starting polling...')
     fetchTimerStatus() // Fetch immediately
@@ -138,8 +138,8 @@ function AddressControlConstraint() {
 
   // Effect for managing polling interval lifecycle based on dependencies
   useEffect(() => {
-    // Start polling only if sessionID exists
-    if (sessionId) {
+    // Start polling only if sessionID exists and not in individual mode
+    if (sessionId && sessionId !== 'individual1') {
       // Clear any previous interval before starting a new one with potentially updated frequency
       stopPolling()
       startPolling()
@@ -152,7 +152,7 @@ function AddressControlConstraint() {
   // Effect for Page Visibility API Integration
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!sessionId) return // Exit if no sessionID is set yet
+      if (!sessionId || sessionId === 'individual1') return // Exit if no sessionID or individual mode
 
       if (document.hidden) {
         console.log('[Visibility] Tab hidden, pausing polling.')
@@ -184,7 +184,7 @@ function AddressControlConstraint() {
       clearInterval(countdownIntervalRef.current)
     }
 
-    if (timerInfo.startTime) {
+    if (timerInfo.startTime && sessionId !== 'individual1') {
       const calculateAndDisplay = () => {
         const startTimeMs = new Date(timerInfo.startTime).getTime()
         const durationMs = (timerInfo.durationSeconds || 90) * 1000
@@ -231,6 +231,47 @@ function AddressControlConstraint() {
   }, [timerInfo, timeExpired]) // Add timeExpired to dependencies
 
   // --- End Timer Logic ---
+
+  // Auto-scroll to bottom when new boxes appear
+  useEffect(() => {
+    if (showControls) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [showControls])
+
+  useEffect(() => {
+    if (showProposedControl) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [showProposedControl])
+
+  useEffect(() => {
+    if (showLimitation) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [showLimitation])
+
+  useEffect(() => {
+    if (showMultipleChoice) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [showMultipleChoice])
+
+  useEffect(() => {
+    if (showExplanationInput) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+      }, 100)
+    }
+  }, [showExplanationInput])
 
   // Extract sessionId from URL on component mount
   // Extract sessionId from URL on component mount
@@ -403,7 +444,24 @@ function AddressControlConstraint() {
       console.log('Explanation saved to URL:', explanationText.trim())
       setExplanationSubmitted(true)
 
-      // Special handling when timer is expired
+      // Special handling for individual mode - navigate to ResearchMethodology
+      if (sessionId === 'individual1') {
+        try {
+          // Save data for individual mode
+          await saveUrlDataToAPI()
+          console.log('Individual data saved successfully!')
+          
+          // Navigate to ResearchMethodology page
+          handleNavigateToNext()
+        } catch (error) {
+          console.error('Error saving individual data:', error)
+          // Still navigate even if save fails
+          handleNavigateToNext()
+        }
+        return
+      }
+
+      // Special handling when timer is expired (group mode only)
       if (timeExpired) {
         try {
           // Call the controls API to save user details
@@ -656,6 +714,7 @@ function AddressControlConstraint() {
           backgroundColor: '#e0e0e0',
           mb: 3,
           borderRadius: 1,
+          border: '1px solid black',
         }}
       >
         <Typography
@@ -697,7 +756,7 @@ function AddressControlConstraint() {
             backgroundColor: 'rgba(255, 90, 0, 0.2)',
             mb: 3,
             borderRadius: 1,
-            border: '2px solid #2196f3',
+            border: '1px solid black',
           }}
         >
           <Typography
@@ -710,7 +769,7 @@ function AddressControlConstraint() {
               color: '#000000',
             }}
           >
-            Concern: Unverified regional specificity.
+            Concern:
           </Typography>
           <Typography
             variant="body1"
@@ -737,7 +796,7 @@ function AddressControlConstraint() {
             backgroundColor: '#d4f6d4',
             mb: 3,
             borderRadius: 1,
-            border: '1px solid #4caf50',
+            border: '1px solid black',
           }}
         >
           <Typography
@@ -750,7 +809,7 @@ function AddressControlConstraint() {
               color: '#4caf50',
             }}
           >
-            Proposed control: use depth electrodes
+            Proposed control:
           </Typography>
           <Typography
             variant="body1"
@@ -774,6 +833,7 @@ function AddressControlConstraint() {
             backgroundColor: '#ffe8d6',
             mb: 3,
             borderRadius: 1,
+            border: '1px solid black',
           }}
         >
           <Typography
@@ -804,8 +864,17 @@ Depth electrodes require a much more invasive procedure, which will limit your a
       {/* Multiple Choice Section - Only visible when showMultipleChoice is true */}
       {showMultipleChoice && (
         <Box sx={{ mt: 3 }}>
-          {/* Multiple Choice Options */}
-          <Box sx={{ mb: 3 }}>
+          {/* Multiple Choice Options Container */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: 1,
+              border: '2px solid black',
+              backgroundColor: 'transparent',
+            }}
+          >
             {[
               'Set this experiment aside.',
               'Run a depth electrode pilot study in a single clinical participant.',
@@ -822,7 +891,7 @@ Depth electrodes require a much more invasive procedure, which will limit your a
                   mb: 1,
                   borderRadius: 1,
                   border:
-                    selectedOption === option ? '2px solid #28a745' : 'none',
+                    selectedOption === option ? '2px solid #28a745' : '1px solid black',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -867,13 +936,13 @@ Depth electrodes require a much more invasive procedure, which will limit your a
                 />
               </Paper>
             ))}
-          </Box>
+          </Paper>
         </Box>
       )}
 
       <div className="header-container">
-        {/* Timer Display - Show when timer is active and not hidden */}
-        {timerInfo.startTime && !hideTimer && (
+        {/* Timer Display - Show when timer is active and not hidden, but not in individual mode */}
+        {timerInfo.startTime && !hideTimer && sessionId !== 'individual1' && (
           <Paper
             elevation={0}
             sx={{
@@ -882,7 +951,7 @@ Depth electrodes require a much more invasive procedure, which will limit your a
               mb: 3,
               borderRadius: 1,
               textAlign: 'center',
-              border: timeExpired ? '2px solid #ff4444' : 'none',
+              border: timeExpired ? '2px solid #ff4444' : '1px solid black',
               boxShadow: timeExpired
                 ? '0 0 10px rgba(255, 68, 68, 0.3)'
                 : 'none',
@@ -913,18 +982,9 @@ Depth electrodes require a much more invasive procedure, which will limit your a
             backgroundColor: '#e0e0e0',
             mb: 3,
             borderRadius: 1,
+            border: '2px solid black',
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{
-              fontSize: '1rem',
-              color: '#999999',
-              marginBottom: '15px',
-            }}
-          >
-            Explain why you picked this option...
-          </Typography>
           <Box sx={{ position: 'relative' }}>
             <TextField
               fullWidth
@@ -933,22 +993,29 @@ Depth electrodes require a much more invasive procedure, which will limit your a
               variant="outlined"
               value={explanationText}
               onChange={handleExplanationTextChange}
-              placeholder=""
+              placeholder="Explain why you picked this option..."
               disabled={explanationSubmitted}
               sx={{
                 backgroundColor: explanationSubmitted ? '#f5f5f5' : 'white',
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    borderColor: '#e0e0e0',
+                    borderColor: 'black',
+                    borderWidth: '1px',
                   },
                   '&:hover fieldset': {
-                    borderColor: '#bdbdbd',
+                    borderColor: 'black',
+                    borderWidth: '1px',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#2196f3',
+                    borderColor: 'black',
+                    borderWidth: '1px',
                   },
                   '&.Mui-disabled': {
                     backgroundColor: '#f5f5f5',
+                    '& fieldset': {
+                      borderColor: 'black',
+                      borderWidth: '1px',
+                    },
                   },
                 },
               }}
@@ -1193,8 +1260,8 @@ Depth electrodes require a much more invasive procedure, which will limit your a
         </Box>
       )}
 
-      {/* Final Submit Button - Show when explanation input is visible */}
-      {showExplanationInput && (
+      {/* Final Submit Button - Show when explanation input is visible and not individual mode */}
+      {showExplanationInput && sessionId !== 'individual1' && (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
           <Button
             variant="contained"

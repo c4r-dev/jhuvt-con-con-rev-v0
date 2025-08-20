@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Box,
   Typography,
@@ -48,6 +48,7 @@ function LoadingContent() {
 
 function StrategyScreen() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [selectedTab, setSelectedTab] = useState(0)
   const [sessionData, setSessionData] = useState([])
   const [filteredData, setFilteredData] = useState([])
@@ -110,8 +111,9 @@ function StrategyScreen() {
     if (sessionId) {
       fetchSessionData(sessionId)
     } else {
-      console.error('No sessionID found in URL parameters')
-      setLoading(false)
+      console.warn('No sessionID found in URL parameters, redirecting to home page')
+      router.push('/')
+      return
     }
   }, [searchParams])
 
@@ -132,6 +134,11 @@ function StrategyScreen() {
 
       const response = await fetch(`/api/controls?sessionId=${sessionId}`)
       if (!response.ok) {
+        if (response.status === 404) {
+          console.warn('Session not found, redirecting to home page')
+          router.push('/')
+          return
+        }
         throw new Error(`Failed to fetch session data: ${response.status}`)
       }
 
@@ -334,7 +341,7 @@ function StrategyScreen() {
           <Box
             sx={{
               position: 'absolute',
-              left: '-80px',
+              left: '-120px',
               top: '50%',
               transform: 'rotate(-90deg)',
               transformOrigin: 'center',
@@ -522,10 +529,10 @@ function StrategyScreen() {
                       fontSize: '0.875rem',
                     }}
                   >
-                    LIMIT
+                    LIMIT.
                   </TableCell>
                 )}
-                {/* Show CUSTOM OPTION column only on OTHER tab (tab index 3) */}
+                {/* Show ALTERNATIVE column only on OTHER tab (tab index 3) */}
                 {selectedTab === 3 && (
                   <TableCell
                     sx={{
@@ -534,7 +541,7 @@ function StrategyScreen() {
                       fontSize: '0.875rem',
                     }}
                   >
-                    CUSTOM OPTION
+                    ALTERNATIVE
                   </TableCell>
                 )}
               </TableRow>
@@ -604,7 +611,7 @@ function StrategyScreen() {
                         </Typography>
                       </TableCell>
                     )}
-                    {/* Show CUSTOM OPTION column only on OTHER tab (tab index 3) */}
+                    {/* Show ALTERNATIVE column only on OTHER tab (tab index 3) */}
                     {selectedTab === 3 && (
                       <TableCell
                         sx={{

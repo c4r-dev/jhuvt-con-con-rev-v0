@@ -23,11 +23,13 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   marginBottom: theme.spacing(2),
   backgroundColor: '#f5f5f5',
+  border: '1px solid black',
 }))
 
 const StyledAccordion = styled(Accordion)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   backgroundColor: '#f5f5f5',
+  border: '1px solid black',
   '&:before': {
     display: 'none',
   },
@@ -45,14 +47,14 @@ const LimitationPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   marginBottom: theme.spacing(2),
   backgroundColor: '#ffebcc',
-  border: '1px solid #ff9800',
+  border: '1px solid black',
 }))
 
 const CompromisePaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   marginBottom: theme.spacing(2),
   backgroundColor: '#e8e3ff',
-  border: '1px solid #9c27b0',
+  border: '1px solid black',
 }))
 
 const ExplanationPaper = styled(Paper)(({ theme }) => ({
@@ -60,6 +62,7 @@ const ExplanationPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   backgroundColor: '#e8e3ff',
   minHeight: '120px',
+  border: '1px solid black',
 }))
 
 const AnswerFieldPaper = styled(Paper)(({ theme }) => ({
@@ -67,6 +70,7 @@ const AnswerFieldPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   backgroundColor: '#f5f5f5',
   minHeight: '120px',
+  border: '2px solid black',
 }))
 
 // Loading component for suspense
@@ -458,28 +462,42 @@ function ResearchMethodologyScreen() {
 
       {/* Only show the text field if there are valid options */}
       {!noValidOptions && (
-        <AnswerFieldPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
+        <AnswerFieldPaper 
+          elevation={1} 
+          sx={{ 
+            backgroundColor: '#e0e0e0'
+          }}
+        >
           <TextField
             multiline
             rows={4}
             fullWidth
             placeholder="Explain the limits of this choice..."
-            variant="standard"
+            variant="outlined"
             value={limitExplanation}
             onChange={(e) => setLimitExplanation(e.target.value)}
             disabled={submitted}
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                fontSize: '0.9rem',
-                backgroundColor: submitted ? '#f5f5f5' : 'transparent',
-                '& .MuiInputBase-input::placeholder': {
-                  color: '#888',
-                  opacity: 1,
+            sx={{
+              backgroundColor: submitted ? '#f5f5f5' : 'white',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'black',
+                  borderWidth: '1px',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'black',
+                  borderWidth: '1px',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'black',
+                  borderWidth: '1px',
                 },
                 '&.Mui-disabled': {
                   backgroundColor: '#f5f5f5',
-                  color: '#666',
+                  '& fieldset': {
+                    borderColor: 'black',
+                    borderWidth: '1px',
+                  },
                 },
               },
             }}
