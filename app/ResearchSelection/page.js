@@ -1131,22 +1131,28 @@ Depth electrodes require a much more invasive procedure, which will limit your a
 
       {/* See Controls Button - Only show if controls are not visible */}
       {!showControls && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: { xs: 'center', sm: 'flex-end' }, 
+          mt: 2 
+        }}>
           <Button
             variant="contained"
             onClick={handleSeeControlsClick}
             sx={{
               bgcolor: '#000000',
               color: 'white',
-              px: 3,
+              px: { xs: 2, sm: 3 },
               py: 1.5,
               fontWeight: 'bold',
-              fontSize: '1rem',
+              fontSize: { xs: '0.85rem', sm: '1rem' },
               '&:hover': {
                 bgcolor: '#333333',
               },
               borderRadius: 1,
               textTransform: 'uppercase',
+              minWidth: { xs: '200px', sm: 'auto' },
+              maxWidth: { xs: '90vw', sm: 'none' }
             }}
           >
             THERE&apos;S A PROBLEM!
@@ -1262,7 +1268,14 @@ Depth electrodes require a much more invasive procedure, which will limit your a
 
       {/* Final Submit Button - Show when explanation input is visible and not individual mode */}
       {showExplanationInput && sessionId !== 'individual1' && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'center', 
+          gap: 2, 
+          mt: 2,
+          alignItems: 'stretch'
+        }}>
           <Button
             variant="contained"
             onClick={handleFinalSubmit}
@@ -1276,10 +1289,10 @@ Depth electrodes require a much more invasive procedure, which will limit your a
                 explanationText.trim() && !finalSubmitted && !timeExpired
                   ? 'white'
                   : '#666666',
-              px: 4,
+              px: { xs: 2, sm: 4 },
               py: 1.5,
               fontWeight: 'bold',
-              fontSize: '1rem',
+              fontSize: { xs: '0.8rem', sm: '1rem' },
               '&:hover': {
                 bgcolor:
                   explanationText.trim() && !finalSubmitted && !timeExpired
@@ -1293,6 +1306,7 @@ Depth electrodes require a much more invasive procedure, which will limit your a
               },
               borderRadius: 1,
               textTransform: 'uppercase',
+              flex: { xs: '1', sm: '0 0 auto' }
             }}
           >
             {finalSubmitted ? 'SUBMITTED' : 'SUBMIT AND START GROUP COUNTDOWN'}
@@ -1305,10 +1319,10 @@ Depth electrodes require a much more invasive procedure, which will limit your a
             sx={{
               bgcolor: isNavigationEnabled() ? '#000000' : '#cccccc',
               color: isNavigationEnabled() ? 'white' : '#666666',
-              px: 4,
+              px: { xs: 2, sm: 4 },
               py: 1.5,
               fontWeight: 'bold',
-              fontSize: '1rem',
+              fontSize: { xs: '0.8rem', sm: '1rem' },
               '&:hover': {
                 bgcolor: isNavigationEnabled() ? '#333333' : '#cccccc',
               },
@@ -1319,6 +1333,7 @@ Depth electrodes require a much more invasive procedure, which will limit your a
               },
               borderRadius: 1,
               textTransform: 'uppercase',
+              flex: { xs: '1', sm: '0 0 auto' }
             }}
           >
             NAVIGATE TO NEXT SCREEN
@@ -1332,9 +1347,15 @@ Depth electrodes require a much more invasive procedure, which will limit your a
 export default function AddressControlConstraintScreen() {
   return (
     <Suspense fallback={<LoadingContent />}>
-      <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+      <Box sx={{ 
+        px: { xs: 1, sm: 2, md: 3 }, 
+        py: { xs: 2, sm: 3, md: 4 },
+        maxWidth: '1200px',
+        mx: 'auto',
+        width: '100%'
+      }}>
         <AddressControlConstraint />
-      </Container>
+      </Box>
     </Suspense>
   )
 }

@@ -84,8 +84,16 @@ export default function RootLayout({ children }) {
               zIndex: 1200,
             }}
           >
-            <Toolbar sx={{ height: 64 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Toolbar sx={{ 
+              height: { xs: 56, sm: 64 },
+              px: { xs: 1, sm: 2 },
+              minHeight: { xs: 56, sm: 64 }
+            }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                width: '100%'
+              }}>
                 <Header
                   onLogoClick={handleLogoClick}
                   onHelpClick={handleHelpClick}
@@ -95,9 +103,19 @@ export default function RootLayout({ children }) {
             </Toolbar>
           </AppBar>
 
-          <Toolbar />
+          <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
 
-          <Container component="main" sx={{ pt: 2, pb: 4 }}>
+          <Container 
+            component="main" 
+            maxWidth={false}
+            sx={{ 
+              pt: 2, 
+              pb: 4,
+              px: { xs: 1, sm: 2, md: 3 },
+              maxWidth: { xs: '100vw', sm: '100vw', md: '1200px' },
+              mx: 'auto'
+            }}
+          >
             {children}
           </Container>
         </ThemeProvider>

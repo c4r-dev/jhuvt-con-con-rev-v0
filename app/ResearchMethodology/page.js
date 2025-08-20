@@ -347,7 +347,13 @@ function ResearchMethodologyScreen() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
+    <Box sx={{ 
+      px: { xs: 1, sm: 2, md: 3 }, 
+      py: { xs: 2, sm: 3, md: 3 },
+      maxWidth: '1200px',
+      mx: 'auto',
+      width: '100%'
+    }}>
       <StyledPaper elevation={1} sx={{ backgroundColor: '#e0e0e0' }}>
         <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
           Now, let&apos;s review someone else&apos;s choices. You receive the
@@ -575,7 +581,7 @@ function ResearchMethodologyScreen() {
           </Button>
         )}
       </Box>
-    </Container>
+    </Box>
   )
 }
 

@@ -57,7 +57,7 @@ body {
 
 .flowchart-container {
   background-color: #ffffff; /* White background for the main content */
-  padding: 30px;
+  padding: clamp(15px, 4vw, 30px);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 900px; /* Limit overall width */
@@ -65,6 +65,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+@media (max-width: 768px) {
+  .flowchart-container {
+    padding: 15px;
+    margin: 0 10px;
+  }
 }
 
 .flowchart-image-container {
@@ -91,12 +98,19 @@ body {
 
 .randomization-section {
   background-color: #f0f0f0; /* Light grey background for this section */
-  padding: 20px;
+  padding: clamp(15px, 3vw, 20px);
   border-radius: 8px;
   width: 100%;
   max-width: 700px; /* Control width of the ideas section */
   box-sizing: border-box; /* Include padding in width */
-  margin-bottom: 30px; /* Space before action buttons */
+  margin-bottom: clamp(20px, 4vw, 30px); /* Space before action buttons */
+}
+
+@media (max-width: 768px) {
+  .randomization-section {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
 }
 
 /* Container for Title and Timer */
@@ -142,12 +156,19 @@ body {
 
 .input-container input[type="text"] {
   flex-grow: 1;
-  padding: 12px 15px;
+  padding: clamp(10px, 2vw, 15px) clamp(12px, 3vw, 15px);
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   outline: none;
   transition: border-color 0.2s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .input-container input[type="text"] {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
 }
 
 .input-container input[type="text"]:focus {
@@ -215,7 +236,15 @@ body {
   max-width: 700px; /* Match width of randomization section */
   display: flex;
   justify-content: flex-end; /* Align buttons to the right */
-  gap: 15px; /* Add space between buttons */
+  gap: clamp(10px, 2vw, 15px); /* Add space between buttons */
+}
+
+@media (max-width: 768px) {
+  .action-buttons-container {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
 }
 
 /* Style for the new Save Ideas button */
@@ -223,14 +252,22 @@ body {
   background-color: #4CAF50; /* Green background */
   color: white;
   border: none;
-  padding: 12px 25px;
+  padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 25px);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   font-weight: bold;
   transition: background-color 0.2s ease-in-out;
   max-width: 260px;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .save-ideas-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 150px;
+  }
 }
 
 .save-ideas-button:hover {
@@ -247,12 +284,21 @@ body {
   background-color: #333; /* Dark background */
   color: white;
   border: none;
-  padding: 12px 25px;
+  padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 25px);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   font-weight: bold;
   transition: background-color 0.2s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .continue-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 150px;
+    width: 100%;
+  }
 }
 
 .continue-button:hover {
@@ -303,12 +349,21 @@ body {
   background-color: #666;
   color: white;
   border: none;
-  padding: 12px 20px;
+  padding: clamp(10px, 2vw, 12px) clamp(18px, 3vw, 20px);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   white-space: nowrap;
   transition: background-color 0.2s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .add-idea-button {
+    padding: 10px 15px;
+    font-size: 0.8rem;
+    white-space: normal;
+    min-width: 100px;
+  }
 }
 
 .add-idea-button:hover {
@@ -338,10 +393,10 @@ body {
 }
 
 .flowchart-step {
-  padding: 10px 12px; /* Reduced padding */
+  padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 12px); /* Responsive padding */
   border-radius: 5px; /* Slightly adjusted border radius */
   color: white;
-  font-size: 0.85rem; /* Reduced font size */
+  font-size: clamp(0.75rem, 2vw, 0.85rem); /* Responsive font size */
   text-align: center;
   display: flex;
   justify-content: center;
@@ -350,7 +405,16 @@ body {
   flex-basis: 0; /* Important for equal distribution with flex-grow */
   box-sizing: border-box;
   line-height: 1.3;
-  min-height: 44px; /* Adjusted min-height */
+  min-height: clamp(36px, 8vw, 44px); /* Responsive min-height */
+}
+
+@media (max-width: 768px) {
+  .flowchart-step {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    min-height: 36px;
+    line-height: 1.2;
+  }
 }
 
 /* Team Headers */
@@ -393,7 +457,15 @@ body {
 
 .flowchart-instruction {
   text-align: center;
-  padding-bottom: 18px;
-  font-size: 1.08rem;
+  padding-bottom: clamp(15px, 3vw, 18px);
+  font-size: clamp(1rem, 2.5vw, 1.08rem);
   color: #222;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .flowchart-instruction {
+    padding-bottom: 15px;
+    font-size: 1rem;
+  }
 }

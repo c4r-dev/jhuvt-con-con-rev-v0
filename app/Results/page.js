@@ -264,7 +264,13 @@ function StrategyScreen() {
   })
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Box sx={{ 
+      px: { xs: 1, sm: 2, md: 3 }, 
+      py: { xs: 2, sm: 3, md: 3 },
+      maxWidth: '1400px',
+      mx: 'auto',
+      width: '100%'
+    }}>
       {/* Loading indicator */}
       {loading && (
         <Alert severity="info" sx={{ mb: 3, border: '1px solid black !important', boxShadow: 'none !important' }}>
@@ -512,8 +518,35 @@ function StrategyScreen() {
 
       {/* Table Section */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: '#e8e8e8', border: '1px solid black !important', boxShadow: 'none !important' }}>
-        <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: '#f5f5f5', border: '1px solid black !important', boxShadow: 'none !important' }}>
-          <Table sx={{ minWidth: 650, border: 'none', '& td, & th': { border: 'none !important' } }}>
+        <TableContainer 
+          component={Paper} 
+          elevation={0} 
+          sx={{ 
+            backgroundColor: '#f5f5f5', 
+            border: '1px solid black !important', 
+            boxShadow: 'none !important',
+            overflowX: 'auto',
+            '&::-webkit-scrollbar': {
+              height: '6px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#f1f1f1',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#888',
+              borderRadius: '3px',
+            },
+          }}
+        >
+          <Table sx={{ 
+            minWidth: { xs: 800, sm: 650 }, 
+            border: 'none', 
+            '& td, & th': { 
+              border: 'none !important',
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              padding: { xs: '8px', sm: '16px' }
+            } 
+          }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#d0d0d0', border: 'none' }}>
                 <TableCell
@@ -649,7 +682,7 @@ function StrategyScreen() {
           </Table>
         </TableContainer>
       </Paper>
-    </Container>
+    </Box>
   )
 }
 

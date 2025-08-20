@@ -10,15 +10,16 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 350,
-  minWidth: 'fit-content',
-  bgcolor: '#6e00ff', // Changed background color to purple
-  // border: '2px solid #000',
+  width: { xs: '95vw', sm: '80vw', md: '600px' },
+  maxWidth: '600px',
+  maxHeight: { xs: '90vh', sm: '80vh' },
+  overflow: 'auto',
+  bgcolor: '#6e00ff',
   border: 'none',
-  borderRadius: '4px',
+  borderRadius: '8px',
   boxShadow: 24,
-  p: 4,
-  color: 'white', // Changed text color to white for better contrast
+  p: { xs: 2, sm: 3, md: 4 },
+  color: 'white',
   outline: 0,
 }
 
@@ -57,20 +58,29 @@ export default function CustomModal({ isOpen, closeModal, hypothesis }) {
             id="modal-modal-title"
             variant="h6"
             component="h2"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              fontSize: { xs: '1.1rem', sm: '1.25rem' },
+              fontWeight: 'bold'
+            }}
           >
             Control Review
           </Typography>
 
           <Typography
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{ mb: 2 }}
+            variant="body1"
+            component="div"
+            sx={{ 
+              mb: 2,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              lineHeight: 1.5
+            }}
           >
-          Choose the study you want to work with, then read the description of the methods used in the study.<br/>
-Write questions you still have about the study&apos;s randomization procedures. What&apos;s missing? <br/>
-Then, sort your questions to see which randomization-related elements of the ARRIVE guidelines your questions exemplify.
+            Choose the study you want to work with, then read the description of the methods used in the study.
+            <br/><br/>
+            Write questions you still have about the study&apos;s randomization procedures. What&apos;s missing?
+            <br/><br/>
+            Then, sort your questions to see which randomization-related elements of the ARRIVE guidelines your questions exemplify.
           </Typography>
         </Box>
       </Modal>

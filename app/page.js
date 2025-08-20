@@ -109,22 +109,27 @@ In order to study the neural dynamics of perceptual integration, subjects listen
       </Paper>
 
       {/* See Controls Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: { xs: 'center', sm: 'flex-end' }, 
+        mt: 2 
+      }}>
         <Button
           variant="contained"
           onClick={handleSeeControlsClick}
           sx={{
             bgcolor: '#000000',
             color: 'white',
-            px: 3,
+            px: { xs: 2, sm: 3 },
             py: 1.5,
             fontWeight: 'bold',
-            fontSize: '1rem',
+            fontSize: { xs: '0.9rem', sm: '1rem' },
             '&:hover': {
               bgcolor: '#333333',
             },
             borderRadius: 1,
             textTransform: 'uppercase',
+            minWidth: { xs: '200px', sm: 'auto' }
           }}
         >
           SEE CONTROLS
@@ -144,9 +149,15 @@ In order to study the neural dynamics of perceptual integration, subjects listen
 export default function AddressControlConstraintScreen() {
   return (
     <Suspense fallback={<LoadingContent />}>
-      <Container maxWidth="md" sx={{ pt: 4, pb: 4 }}>
+      <Box sx={{ 
+        px: { xs: 1, sm: 2, md: 3 }, 
+        py: { xs: 2, sm: 3, md: 4 },
+        maxWidth: '1200px',
+        mx: 'auto',
+        width: '100%'
+      }}>
         <AddressControlConstraint />
-      </Container>
+      </Box>
     </Suspense>
   )
 }
