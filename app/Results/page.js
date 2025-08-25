@@ -285,26 +285,22 @@ function StrategyScreen() {
         </Alert>
       )}
 
-      {/* Constraint Alert */}
+      {/* Neutral instruction box */}
       <Alert
-        severity="warning"
+        severity="info"
         sx={{
           mb: 3,
-          backgroundColor: '#FFE4B5',
-          color: '#8B4513',
+          backgroundColor: '#e0e0e0',
+          color: '#000000',
           border: '1px solid black !important',
           boxShadow: 'none !important',
           '& .MuiAlert-icon': {
-            color: '#FF6B35',
+            display: 'none',
           },
         }}
       >
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Limitation
-        </Typography>
-        <Typography variant="body2">
-          Sample Size: Depth electrodes require a much more invasive procedure,
-          which will limit your ability to recruit subjects for the experiment.{' '}
+        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          Below you can see how others decided to approach the limitations of this study. Click between tabs to see how others justified their approach, and the limitations of those responses.
         </Typography>
       </Alert>
 
