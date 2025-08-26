@@ -314,13 +314,13 @@ function ResearchMethodologyScreen() {
       setSubmitted(true) // Disable button immediately
 
       const response = await fetch('/api/controls', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           sessionId: sessionId,
-          studentId: displayedOptionStudentId,
+          studentId: currentStudentId,
           limitExplanation: limitExplanation.trim(),
         }),
       })
