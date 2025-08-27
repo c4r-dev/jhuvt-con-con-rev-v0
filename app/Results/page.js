@@ -22,6 +22,7 @@ import {
   TableRow,
   CircularProgress,
 } from '@mui/material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 
 const chartData = [
   { name: 'Set aside', value: 6 },
@@ -255,6 +256,13 @@ function StrategyScreen() {
     console.log('Generated table rows:', rows)
   }
 
+  const handleRefresh = () => {
+    const sessionId = searchParams.get('sessionID')
+    if (sessionId) {
+      fetchSessionData(sessionId)
+    }
+  }
+
   // Debug: Show current state
   console.log('Current state:', {
     selectedTab,
@@ -303,6 +311,36 @@ function StrategyScreen() {
           Below you can see how others decided to approach the limitations of this study. Click between tabs to see how others justified their approach, and the limitations of those responses.
         </Typography>
       </Alert>
+
+      {/* Refresh Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <Button
+          variant="contained"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+          disabled={loading}
+          sx={{
+            fontFamily: 'var(--font-general-sans-semi-bold)',
+            width: 'fit-content',
+            padding: { xs: '8px 16px', sm: '10px 20px' },
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            backgroundColor: '#202020',
+            color: 'white',
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: '#6e00ff',
+            },
+            '&:disabled': {
+              backgroundColor: '#A2A2A2',
+              color: 'grey',
+            },
+          }}
+        >
+          Refresh Data
+        </Button>
+      </Box>
 
       {/* Chart Section */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, backgroundColor: '#f5f5f5', border: '1px solid black !important', boxShadow: 'none !important' }}>
