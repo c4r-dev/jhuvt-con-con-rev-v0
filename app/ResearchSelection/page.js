@@ -350,6 +350,11 @@ function AddressControlConstraint() {
   }
 
   const handleCheckboxChange = (option, checked) => {
+    // Prevent changes after first submit button is clicked (explanation input is shown)
+    if (showExplanationInput) {
+      return
+    }
+    
     if (checked) {
       // First, always select the option
       setSelectedOption(option)
@@ -390,12 +395,20 @@ function AddressControlConstraint() {
   }
 
   const handleOtherDialogClose = () => {
+    // Don't allow dialog interaction after first submit is clicked
+    if (showExplanationInput) {
+      return
+    }
     setShowOtherDialog(false)
     // Keep the "Other" option selected even if dialog is closed without text
     // The checkbox will remain checked
   }
 
   const handleOtherDialogSave = () => {
+    // Don't allow dialog interaction after first submit is clicked
+    if (showExplanationInput) {
+      return
+    }
     if (otherOptionText.trim()) {
       setSelectedOption('Other.')
       setShowOtherDialog(false)
@@ -895,9 +908,12 @@ Depth electrodes require a much more invasive procedure, which will limit your a
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  opacity: showExplanationInput ? 0.6 : 1,
+                  cursor: showExplanationInput ? 'not-allowed' : 'pointer',
                   '&:hover': {
-                    backgroundColor:
-                      selectedOption === option ? '#d4edda' : '#d5d5d5',
+                    backgroundColor: showExplanationInput ? 
+                      (selectedOption === option ? '#d4edda' : '#e0e0e0') :
+                      (selectedOption === option ? '#d4edda' : '#d5d5d5'),
                   },
                 }}
               >
@@ -908,26 +924,48 @@ Depth electrodes require a much more invasive procedure, which will limit your a
                       onChange={(e) =>
                         handleCheckboxChange(option, e.target.checked)
                       }
+                      disabled={showExplanationInput}
                       sx={{
-                        color: '#666666',
+                        color: showExplanationInput ? '#cccccc' : '#666666',
                         '&.Mui-checked': {
-                          color: '#28a745',
+                          color: showExplanationInput ? '#cccccc' : '#28a745',
+                        },
+                        '&.Mui-disabled': {
+                          color: '#cccccc',
+                          '&.Mui-checked': {
+                            color: '#cccccc',
+                          },
                         },
                       }}
                     />
                   }
                   label={
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontSize: '1rem',
-                        color: '#000000',
-                        fontWeight:
-                          selectedOption === option ? 'bold' : 'normal',
-                      }}
-                    >
-                      {option}
-                    </Typography>
+                    <Box>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontSize: '1rem',
+                          color: showExplanationInput ? '#666666' : '#000000',
+                          fontWeight:
+                            selectedOption === option ? 'bold' : 'normal',
+                        }}
+                      >
+                        {option}
+                      </Typography>
+                      {option === 'Other.' && otherOptionText.trim() && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '0.875rem',
+                            color: showExplanationInput ? '#888888' : '#666666',
+                            fontStyle: 'italic',
+                            mt: 0.5,
+                          }}
+                        >
+                          {otherOptionText.trim()}
+                        </Typography>
+                      )}
+                    </Box>
                   }
                   sx={{
                     margin: 0,
