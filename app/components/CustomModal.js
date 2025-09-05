@@ -67,21 +67,30 @@ export default function CustomModal({ isOpen, closeModal, hypothesis }) {
             Control Review
           </Typography>
 
-          <Typography
-            variant="body1"
-            component="div"
-            sx={{ 
+          <Box
+            component="ol"
+            sx={{
               mb: 2,
               fontSize: { xs: '0.9rem', sm: '1rem' },
-              lineHeight: 1.5
+              lineHeight: 1.5,
+              pl: 3,
+              m: 0,
+              mb: 2
             }}
           >
-            Choose the study you want to work with, then read the description of the methods used in the study.
-            <br/><br/>
-            Write questions you still have about the study&apos;s randomization procedures. What&apos;s missing?
-            <br/><br/>
-            Then, sort your questions to see which randomization-related elements of the ARRIVE guidelines your questions exemplify.
-          </Typography>
+            <Box component="li" sx={{ mb: 1.5 }}>
+              Progress through how a research team proposes to address an issue with their experiment.
+            </Box>
+            <Box component="li" sx={{ mb: 1.5 }}>
+              Once you see the control the team proposed to address the issue, you will consider the limitations of that control and select a way to improve it, providing your rationale.
+            </Box>
+            <Box component="li" sx={{ mb: 1.5 }}>
+              Then, you will see how another user&apos;s selected choice and rationale. You will then explain the limits of that choice, including what you would expect the study would report if they implemented the chosen strategy.
+            </Box>
+            <Box component="li" sx={{ mb: 0 }}>
+              Review how other users improved the controls in the study, and how they explained the limitations of each approach.
+            </Box>
+          </Box>
         </Box>
       </Modal>
     </div>
