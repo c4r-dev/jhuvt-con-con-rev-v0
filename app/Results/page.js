@@ -307,8 +307,11 @@ function StrategyScreen() {
           },
         }}
       >
-        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
           Below you can see how others decided to approach the limitations of this study. Click between tabs to see how others justified their approach, and the limitations of those responses.
+        </Typography>
+        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          This activity updates in real time. Check back later if you don&apos;t yet see a response to your submission!
         </Typography>
       </Alert>
 
@@ -583,6 +586,19 @@ function StrategyScreen() {
           }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#d0d0d0', border: 'none' }}>
+                {/* Show ALTERNATIVE column first on OTHER tab (tab index 3) */}
+                {selectedTab === 3 && (
+                  <TableCell
+                    sx={{
+                      fontWeight: 'bold',
+                      color: '#666',
+                      fontSize: '0.875rem',
+                      border: 'none',
+                    }}
+                  >
+                    ALTERNATIVE
+                  </TableCell>
+                )}
                 <TableCell
                   sx={{
                     fontWeight: 'bold',
@@ -604,19 +620,6 @@ function StrategyScreen() {
                     }}
                   >
                     LIMIT
-                  </TableCell>
-                )}
-                {/* Show ALTERNATIVE column only on OTHER tab (tab index 3) */}
-                {selectedTab === 3 && (
-                  <TableCell
-                    sx={{
-                      fontWeight: 'bold',
-                      color: '#666',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                    }}
-                  >
-                    ALTERNATIVE
                   </TableCell>
                 )}
               </TableRow>
@@ -652,6 +655,26 @@ function StrategyScreen() {
                     key={`${row.studentId}-${index}`}
                     sx={{ border: 'none', '& td, & th': { border: 'none !important' }, '&:last-child td, &:last-child th': { border: 'none !important' } }}
                   >
+                    {/* Show ALTERNATIVE column first on OTHER tab (tab index 3) */}
+                    {selectedTab === 3 && (
+                      <TableCell
+                        sx={{
+                          backgroundColor: '#f0f0f0',
+                          padding: 2,
+                          verticalAlign: 'top',
+                          maxWidth: '250px',
+                          wordWrap: 'break-word',
+                          border: 'none !important',
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{ whiteSpace: 'pre-wrap' }}
+                        >
+                          {row.customOption}
+                        </Typography>
+                      </TableCell>
+                    )}
                     <TableCell
                       sx={{
                         backgroundColor: '#f0f0f0',
@@ -686,26 +709,6 @@ function StrategyScreen() {
                           sx={{ whiteSpace: 'pre-wrap' }}
                         >
                           {row.limitExplanation}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    {/* Show ALTERNATIVE column only on OTHER tab (tab index 3) */}
-                    {selectedTab === 3 && (
-                      <TableCell
-                        sx={{
-                          backgroundColor: '#f0f0f0',
-                          padding: 2,
-                          verticalAlign: 'top',
-                          maxWidth: '250px',
-                          wordWrap: 'break-word',
-                          border: 'none !important',
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{ whiteSpace: 'pre-wrap' }}
-                        >
-                          {row.customOption}
                         </Typography>
                       </TableCell>
                     )}
