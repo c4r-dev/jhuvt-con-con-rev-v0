@@ -33,6 +33,16 @@ const studentSchema = new Schema(
       type: String,
       required: false // Only populated when option is "Other."
     },
+    // Store the explanation that was displayed to this user in Screen 2 (from another user)
+    displayedExplanation: {
+      type: String,
+      required: false
+    },
+    // Store which student's explanation was shown to this user
+    displayedOptionStudentId: {
+      type: String,
+      required: false
+    },
     timestamp: {
       type: Date,
       default: Date.now
