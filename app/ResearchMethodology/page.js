@@ -322,6 +322,8 @@ function ResearchMethodologyScreen() {
           sessionId: sessionId,
           studentId: currentStudentId,
           limitExplanation: limitExplanation.trim(),
+          displayedExplanation: selectedStudentExplanation, // Store the random explanation that was shown
+          displayedOptionStudentId: displayedOptionStudentId, // Store which student's explanation was shown
         }),
       })
 

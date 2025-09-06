@@ -225,26 +225,35 @@ function StrategyScreen() {
     console.log('Filtered data:', filtered)
     setFilteredData(filtered)
 
-    // Create table rows with expanded limit explanations
+    // Create table rows based ONLY on Screen 2 data: random explanations displayed (purple) and user limits
     const rows = []
     
     filtered.forEach((student) => {
       const limitExplanations = extractLimitExplanations(student)
+      // Use ONLY the random explanation that was displayed in Screen 2 (purple section)
+      const displayedExplanation = student.displayedExplanation || ''
+      
+      console.log(`=== STUDENT ${student.studentId} DATA ===`)
+      console.log('Student response (own from Screen 1):', student.response)
+      console.log('Displayed explanation (shown in Screen 2 purple):', student.displayedExplanation)
+      console.log('Displayed option student ID:', student.displayedOptionStudentId)
+      console.log('Limit explanations:', limitExplanations)
+      console.log('Using displayed explanation from Screen 2:', displayedExplanation)
       
       if (limitExplanations.length === 0) {
-        // If no limit explanations, create a single row
+        // If no limit explanations, create a single row with the displayed explanation from Screen 2
         rows.push({
-          explanation: student.response || '',
+          explanation: displayedExplanation, // This is the RANDOM explanation shown in Screen 2 purple section
           limitExplanation: '',
           customOption: student.customOption || '',
           studentId: student.studentId
         })
       } else {
-        // Create a row for each limit explanation
+        // Create a row for each limit explanation, each paired with the displayed explanation from Screen 2
         limitExplanations.forEach((limitExp) => {
           rows.push({
-            explanation: student.response || '',
-            limitExplanation: limitExp,
+            explanation: displayedExplanation, // This is the RANDOM explanation shown in Screen 2 purple section
+            limitExplanation: limitExp, // This is the user's limit response to that random explanation
             customOption: student.customOption || '',
             studentId: student.studentId
           })
@@ -308,10 +317,10 @@ function StrategyScreen() {
         }}
       >
         <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Below you can see how others decided to approach the limitations of this study. Click between tabs to see how others justified their approach, and the limitations of those responses.
+          Below you can see the random explanations that were displayed to users in Screen 2 (purple section) paired with the limits that users identified for those explanations. Each row shows a random explanation and the user&apos;s limitation analysis of it.
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-          This activity updates in real time. Check back later if you don&apos;t yet see a response to your submission!
+          If a user provided multiple limits for the same random explanation, you&apos;ll see multiple rows with the same explanation but different limit responses.
         </Typography>
       </Alert>
 

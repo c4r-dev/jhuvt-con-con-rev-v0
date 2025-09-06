@@ -439,7 +439,7 @@ export async function PATCH(req) {
     await connectMongoDB();
     
     const body = await req.json();
-    const { sessionId, studentId, limitExplanation } = body;
+    const { sessionId, studentId, limitExplanation, displayedExplanation, displayedOptionStudentId } = body;
     
     console.log('=== PATCH API DEBUG START ===');
     console.log('Request body:', body);
@@ -542,6 +542,17 @@ export async function PATCH(req) {
       console.log('Marked limitExplanations as modified');
     }
     
+    // Update displayed explanation fields if provided
+    if (displayedExplanation !== undefined) {
+      student.displayedExplanation = displayedExplanation;
+      console.log('Updated displayedExplanation to:', displayedExplanation);
+    }
+    
+    if (displayedOptionStudentId !== undefined) {
+      student.displayedOptionStudentId = displayedOptionStudentId;
+      console.log('Updated displayedOptionStudentId to:', displayedOptionStudentId);
+    }
+    
     // Update timestamp
     student.timestamp = new Date();
     
@@ -579,6 +590,8 @@ export async function PATCH(req) {
             limitExplanation: updatedStudent.limitExplanation,
             limitExplanations: updatedStudent.limitExplanations,
             customOption: updatedStudent.customOption,
+            displayedExplanation: updatedStudent.displayedExplanation,
+            displayedOptionStudentId: updatedStudent.displayedOptionStudentId,
             timestamp: updatedStudent.timestamp
           },
           updatedAt: new Date().toISOString()
