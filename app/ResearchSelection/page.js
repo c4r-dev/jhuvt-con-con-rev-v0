@@ -793,7 +793,7 @@ function AddressControlConstraint() {
             }}
           >
             There is no confirmation that the observed information transfer is
-            specific the monitored brain regions, so any claim describing neural
+            specific to the monitored brain regions, so any claim describing neural
             dynamics would be predicated on the assumption that the findings
             aren&apos;t confounded by other regions or connections.{' '}
           </Typography>
